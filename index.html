@@ -1,0 +1,3081 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#EDF1F7">
+<title>รูบิค 3×3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EDF1F7;--surface:#FFFFFF;--surface2:#F2F5FA;--ink:#18213A;--muted:#5E6880;--line:#DCE2EC;
+  --accent:#2E5BFF;--accent-ink:#FFFFFF;--accent-soft:#E4EAFF;--ok:#0B8F61;--ok-soft:#DCF4E9;--warn:#C62828;--warn-soft:#FDECEC;
+  --now:#FFD500;--plastic:#16181D;--stage1:#FAFBFE;--stage2:#D6DEEC;
+  --shadow:0 1px 2px rgba(24,33,58,.05),0 10px 30px rgba(24,33,58,.07);
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0E1424;--surface:#17203A;--surface2:#1F2A48;--ink:#E8EDF7;--muted:#9BA7C0;--line:#2A3657;
+  --accent:#7A95FF;--accent-ink:#0E1424;--accent-soft:#25315C;--ok:#45D6A0;--ok-soft:#163B30;--warn:#FF8A80;--warn-soft:#3A1E24;
+  --stage1:#1E2948;--stage2:#0A0F1D;--shadow:none;
+}}
+:root[data-theme="dark"]{
+  --bg:#0E1424;--surface:#17203A;--surface2:#1F2A48;--ink:#E8EDF7;--muted:#9BA7C0;--line:#2A3657;
+  --accent:#7A95FF;--accent-ink:#0E1424;--accent-soft:#25315C;--ok:#45D6A0;--ok-soft:#163B30;--warn:#FF8A80;--warn-soft:#3A1E24;
+  --stage1:#1E2948;--stage2:#0A0F1D;--shadow:none;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 "IBM Plex Sans Thai",Tahoma,"Leelawadee UI",sans-serif;padding-bottom:92px;-webkit-text-size-adjust:100%}
+h1,h2,h3{font-family:Mitr,"IBM Plex Sans Thai",Tahoma,sans-serif;font-weight:500;line-height:1.3;margin:0}
+button{font:inherit;color:inherit;cursor:pointer;-webkit-user-select:none;user-select:none}
+button:disabled{opacity:.4;cursor:default}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+
+.app{max-width:560px;margin:0 auto;padding:12px 14px 0}
+@media(min-width:980px){
+  .app{max-width:1080px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;padding-top:24px}
+  .left{position:sticky;top:calc(24px + env(safe-area-inset-top,0px));align-self:start}
+}
+.topbar{display:flex;align-items:center;gap:10px;margin:2px 2px 12px}
+.logo{width:30px;height:30px;display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:3px;background:var(--plastic);border-radius:8px}
+.logo i{border-radius:2px}
+.topbar h1{font-size:21px}
+.topbar span{margin-left:auto;font-size:13px;color:var(--muted)}
+
+/* stage */
+.stage{position:relative;height:250px;border-radius:28px;background:radial-gradient(120% 90% at 50% 30%,var(--stage1),var(--stage2));perspective:1000px;touch-action:none;cursor:grab;overflow:hidden;user-select:none;-webkit-user-select:none}
+.stage:active{cursor:grabbing}
+@media(min-width:980px){.stage{height:420px}}
+.floor{position:absolute;left:50%;bottom:9%;width:46%;height:16px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,0,.22),transparent);pointer-events:none}
+.cube{position:absolute;left:50%;top:48%;width:0;height:0;transform-style:preserve-3d}
+.cubie{position:absolute;transform-style:preserve-3d}
+.face{position:absolute;background:var(--plastic);display:grid;place-items:center;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.face i{width:88%;height:88%;border-radius:16%;display:grid;place-items:center;font:500 1em Mitr,sans-serif;font-style:normal;color:rgba(0,0,0,.4)}
+.viewbtn{position:absolute;right:12px;top:12px;width:38px;height:38px;border-radius:12px;border:0;display:grid;place-items:center;background:color-mix(in srgb,var(--surface) 75%,transparent);color:var(--muted)}
+
+/* player */
+.player{background:var(--surface);border-radius:22px;padding:12px 14px 14px;margin-top:10px;box-shadow:var(--shadow)}
+.mv{display:flex;align-items:center;gap:14px;min-height:62px}
+.mv b{flex:none;min-width:62px;height:62px;padding:0 10px;border-radius:18px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);font:500 30px/1 Mitr,sans-serif;transition:background .15s}
+.mv b.long{font-size:22px}
+.mv b.now{background:var(--now);color:#18213A}
+.mv b.ok{background:var(--ok-soft);color:var(--ok)}
+.mv strong{display:block;font:500 16px/1.35 Mitr,sans-serif}
+.mv span{display:block;font-size:14px;color:var(--muted);line-height:1.45}
+.mv span.ok{color:var(--ok);font-weight:600}
+.track{height:6px;border-radius:3px;background:var(--surface2);margin:12px 0 8px;overflow:hidden}
+.track i{display:block;height:100%;width:0;background:var(--accent);border-radius:3px;transition:width .25s}
+.chips{position:relative;display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;padding:2px 0;scroll-behavior:smooth}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;min-width:36px;text-align:center;padding:3px 8px;border-radius:9px;background:var(--surface2);font:500 15px/1.5 Mitr,sans-serif}
+.chip.done{opacity:.4}
+.chip.now{background:var(--now);color:#18213A}
+.chip.next{box-shadow:inset 0 0 0 2px var(--accent)}
+.ctrls{display:grid;grid-template-columns:1fr 1fr 2fr 1fr;gap:8px;margin-top:12px}
+.ctrls[hidden],.chips[hidden],.track[hidden]{display:none}
+.cbtn{height:48px;border:0;border-radius:15px;background:var(--surface2);display:flex;align-items:center;justify-content:center;gap:6px;font:500 15px Mitr,sans-serif}
+.cbtn.primary{background:var(--accent);color:var(--accent-ink)}
+
+/* generic */
+.screen[hidden]{display:none}
+.card{background:var(--surface);border-radius:24px;padding:18px;box-shadow:var(--shadow);margin-top:14px}
+@media(min-width:980px){.right .card:first-child,.right .stepper:first-child{margin-top:0}}
+.btn{border:0;border-radius:15px;background:var(--surface2);padding:12px 14px;font:500 15px Mitr,sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:transparent;box-shadow:inset 0 0 0 1.5px var(--line)}
+.btn.big{width:100%;padding:16px;font-size:17px;border-radius:18px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+
+/* lessons */
+.stepper{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:2px;margin-top:14px}
+.stepper::-webkit-scrollbar{display:none}
+.pill{flex:none;min-width:44px;height:44px;padding:0 12px;border-radius:14px;border:0;background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--line);font:500 15px Mitr,sans-serif;display:grid;place-items:center}
+.pill.done{background:var(--ok-soft);color:var(--ok);box-shadow:none}
+.pill[aria-current="step"]{background:var(--accent);color:var(--accent-ink);box-shadow:none}
+.lhead{display:flex;gap:14px;align-items:flex-start}
+.badge{flex:none;width:52px;height:52px;border-radius:15px;display:grid;place-items:center;font:500 22px Mitr,sans-serif;background:var(--sc);color:var(--sci);box-shadow:inset 0 0 0 1px rgba(0,0,0,.1)}
+.lhead h2{font-size:22px}
+.lhead p{margin:2px 0 0;color:var(--muted)}
+.how{list-style:none;counter-reset:h;margin:16px 0 4px;padding:0}
+.how li{counter-increment:h;position:relative;padding:0 0 12px 38px}
+.how li::before{content:counter(h);position:absolute;left:0;top:1px;width:26px;height:26px;border-radius:50%;background:var(--surface2);display:grid;place-items:center;font:500 14px Mitr,sans-serif;color:var(--muted)}
+.algbox{display:flex;align-items:center;gap:12px;background:var(--surface2);border-radius:18px;padding:12px 12px 12px 16px;margin-top:10px}
+.algbox div{flex:1;min-width:0}
+.algbox code{display:block;font:500 20px/1.35 Mitr,sans-serif;word-spacing:.2em}
+.algbox small{display:block;color:var(--muted);font-size:13px}
+.algbox .btn{flex:none;padding:10px 14px}
+.tip{margin:14px 0 0;padding:12px 14px;border-radius:16px;background:var(--accent-soft);font-size:14px}
+.lfoot{display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:8px;margin-top:18px}
+.lfoot .done-btn[aria-pressed="true"]{background:var(--ok-soft);color:var(--ok)}
+.rules{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:16px 0 6px;align-items:center}
+.rules b{font:500 18px Mitr,sans-serif;min-width:40px;text-align:center;background:var(--surface2);border-radius:10px;padding:2px 8px}
+.nota{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:14px}
+.nota button,.pad button{height:48px;border:0;border-radius:14px;background:var(--surface2);font:500 17px Mitr,sans-serif;position:relative}
+.pad button::after{content:"";position:absolute;top:7px;right:7px;width:7px;height:7px;border-radius:50%;background:var(--dot);box-shadow:0 0 0 1px rgba(0,0,0,.15)}
+
+/* practice */
+.pad{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin-top:14px}
+.pad button{height:54px;font-size:19px}
+.pad button:active,.nota button:active{transform:scale(.96)}
+
+/* solve */
+.hold{margin:0;font-size:15px}
+.facebar{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:14px}
+.ftab{border:0;background:var(--surface2);border-radius:14px;padding:7px 2px 5px;font:500 12px/1.3 Mitr,sans-serif;position:relative}
+.ftab[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent);box-shadow:inset 0 0 0 2px var(--accent)}
+.ftab .ok{position:absolute;top:-4px;right:-4px;width:18px;height:18px;border-radius:50%;background:var(--ok);color:#fff;display:grid;place-items:center;font-size:11px}
+.mini{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;width:32px;margin:0 auto 4px;background:var(--plastic);padding:2px;border-radius:5px}
+.mini b{aspect-ratio:1;border-radius:1px;display:block}
+.facehead{margin-top:18px}
+.facehead h2{font-size:21px}
+.facehead p{margin:4px 0 0;color:var(--muted);font-size:15px}
+.vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.photo-row .btn{cursor:pointer;-webkit-user-select:none;user-select:none;font-size:16px;padding:14px}
+.photo-row:has(.vh:focus-visible){outline:3px solid var(--accent);outline-offset:3px;border-radius:18px}
+.linkbtn{display:block;margin:10px auto 0;border:0;background:none;color:var(--accent);font-size:14px;text-decoration:underline;text-underline-offset:3px;padding:6px}
+.live{position:relative;margin:0 auto;border-radius:16px;overflow:hidden;background:#000;max-height:60vh;display:flex;justify-content:center}
+.live video{display:block;max-width:100%;max-height:60vh}
+.guide{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);border:3px solid #fff;border-radius:10px;box-shadow:0 0 0 200vmax rgba(0,0,0,.45);display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);pointer-events:none}
+.guide i{border:1px solid rgba(255,255,255,.7)}
+.or{display:flex;align-items:center;gap:10px;margin:16px 0 6px;color:var(--muted);font-size:13px}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
+.side-label{text-align:center;font-size:13px;color:var(--muted);min-height:1.5em}
+.grid9{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:min(230px,72%);margin:2px auto;background:var(--plastic);padding:8px;border-radius:18px}
+.grid9 button{aspect-ratio:1;border:0;border-radius:11px;font:500 17px Mitr,sans-serif;color:rgba(0,0,0,.4)}
+.grid9 button.unset{background:repeating-linear-gradient(45deg,#7d8796 0 6px,#8f99a8 6px 12px)}
+.grid9 button:disabled{opacity:1}
+.palette{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:14px}
+.swatch{border:0;background:var(--surface2);border-radius:14px;padding:7px 2px 5px;font-size:12px;line-height:1.3;display:grid;justify-items:center;gap:3px}
+.swatch i{width:28px;height:28px;border-radius:9px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.18)}
+.swatch[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--accent);background:var(--accent-soft)}
+.swatch .over{color:var(--warn);font-weight:600}
+.solvebtn{margin-top:14px}
+.errcard{background:var(--warn-soft);border-radius:20px;padding:14px 16px;margin-top:14px}
+.errcard strong{font-family:Mitr,sans-serif;font-weight:500;color:var(--warn)}
+.errcard ul{margin:6px 0;padding-left:20px}
+.infocard{background:var(--accent-soft);border-radius:20px;padding:12px 16px;margin-top:14px;font-size:15px}
+.result h2{font-size:22px}
+.solmoves{font:500 20px/1.8 Mitr,sans-serif;word-spacing:.25em;margin:8px 0}
+.solmoves span{white-space:nowrap;margin-right:.9em}
+details.card summary{font:500 17px Mitr,sans-serif;cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between}
+details.card summary::-webkit-details-marker{display:none}
+details.card summary::after{content:"+";font-size:22px;color:var(--muted)}
+details.card[open] summary::after{content:"–"}
+.crow{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:center;margin:8px 0}
+.crow input[type=color]{width:44px;height:38px;border:0;border-radius:10px;padding:2px;background:var(--surface2)}
+.crow input[type=text]{font:inherit;color:var(--ink);background:var(--surface2);border:0;border-radius:10px;padding:7px 11px;min-width:0}
+.crow small{color:var(--muted);font-size:13px}
+.tools{display:grid;gap:8px;margin-top:12px}
+
+/* photo sheet */
+.sheet-back{position:fixed;inset:0;z-index:40;background:rgba(8,12,24,.55);display:flex;align-items:flex-end;justify-content:center}
+.sheet-back[hidden]{display:none}
+.sheet{width:100%;max-width:560px;max-height:100%;overflow:auto;background:var(--surface);border-radius:26px 26px 0 0;padding:18px 16px calc(16px + env(safe-area-inset-bottom,0px))}
+.sheet h3{font-size:19px}
+.sheet p{margin:4px 0 10px;color:var(--muted);font-size:14px}
+.sheet canvas{display:block;margin:0 auto;border-radius:16px;touch-action:none;cursor:move;background:#000}
+.rangerow{display:flex;align-items:center;gap:12px;margin-top:12px;font-size:14px;color:var(--muted)}
+.rangerow input{flex:1;accent-color:var(--accent)}
+.sheetbtns{display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:8px;margin-top:14px}
+
+.resetrow .btn{padding:9px 10px;font-size:14px}
+.resetrow .btn.confirm{background:var(--warn-soft);color:var(--warn);box-shadow:none}
+/* bluetooth */
+.btpill{margin-left:auto;border:0;border-radius:999px;padding:7px 13px 7px 10px;display:inline-flex;align-items:center;gap:6px;background:var(--surface);box-shadow:var(--shadow);font:500 13px Mitr,sans-serif;color:var(--accent)}
+.btpill svg{width:18px;height:18px}
+.btpill.on{background:var(--ok-soft);color:var(--ok);box-shadow:none}
+.btpill.on::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--ok);margin-right:2px}
+.btonly{display:none}
+body.bt-on .btonly{display:block}
+body.bt-on .nobt{display:none}
+.mv b.warn{background:var(--warn-soft);color:var(--warn)}
+.btinfo{display:flex;align-items:center;gap:12px;background:var(--ok-soft);color:var(--ok);border-radius:16px;padding:12px 14px;margin:6px 0 4px;font:500 15px Mitr,sans-serif}
+.btinfo small{display:block;font:400 13px "IBM Plex Sans Thai",sans-serif;color:var(--muted)}
+.sheet .how{margin-top:8px}
+.sheet .how li{font-size:15px}
+.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:50;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:14px;font-size:14px;max-width:90vw;box-shadow:0 8px 24px rgba(0,0,0,.2)}
+.toast[hidden]{display:none}
+
+/* bottom nav */
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:30;padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px));background:color-mix(in srgb,var(--surface) 90%,transparent);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-top:1px solid var(--line);display:flex;justify-content:center}
+.nav div{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:100%;max-width:520px}
+.nav button{border:0;background:none;border-radius:16px;padding:6px 0 4px;display:grid;justify-items:center;gap:1px;font:500 13px Mitr,sans-serif;color:var(--muted)}
+.nav button svg{width:24px;height:24px}
+.nav button[aria-selected="true"]{color:var(--accent);background:var(--accent-soft)}
+@media (prefers-reduced-motion:reduce){.track i,.mv b{transition:none}.chips{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="left">
+    <div class="topbar">
+      <div class="logo" aria-hidden="true"><i style="background:#FFD500"></i><i style="background:#FF5800"></i><i style="background:#FFD500"></i><i style="background:#009E60"></i><i style="background:#F4F6F8"></i><i style="background:#C41E3A"></i><i style="background:#0051BA"></i><i style="background:#FFD500"></i><i style="background:#009E60"></i></div>
+      <h1>รูบิค 3×3</h1><button class="btpill" id="btPill" type="button"><svg class="i" viewBox="0 0 24 24"><path d="M7 7l10 10-5 4V3l5 4L7 17"/></svg><span id="btPillText">เชื่อมลูกบลูทูธ</span></button>
+    </div>
+    <div class="stage" id="stage" aria-label="ลูกบาศก์รูบิคจำลอง ลากเพื่อหมุนมุมมอง">
+      <div class="floor"></div>
+      <div class="cube" id="cube"></div>
+      <button class="viewbtn" id="resetView" type="button" aria-label="มุมมองเดิม"><svg class="i" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.5-5.8"/><path d="M4 4v4h4"/></svg></button>
+    </div>
+    <div class="player" aria-live="polite">
+      <div class="mv"><b id="mvBig">3×3</b><div><strong id="mvTitle"></strong><span id="mvDesc"></span></div></div>
+      <div class="track" id="track"><i id="trackFill"></i></div>
+      <div class="chips" id="chips"></div>
+      <div class="ctrls" id="ctrls"></div>
+    </div>
+  </div>
+
+  <main class="right">
+    <section class="screen" id="learn">
+      <div class="stepper" id="stepper"></div>
+      <article class="card" id="lesson"></article>
+    </section>
+
+    <section class="screen" id="practice" hidden>
+      <div class="card">
+        <h2 style="font-size:22px">ฝึกหมุนเอง</h2>
+        <p class="muted nobt" style="margin:4px 0 0">สุ่มโจทย์ แล้วลองแก้ตามบทเรียน เวลาจะเริ่มเดินเมื่อหมุนท่าแรก</p>
+        <div class="btonly">
+          <div class="btinfo"><svg class="i" viewBox="0 0 24 24"><path d="M7 7l10 10-5 4V3l5 4L7 17"/></svg><div>ลูกจริงเชื่อมอยู่<small>หมุนลูกจริง แล้วลูกในจอจะหมุนตาม</small></div></div>
+          <p class="muted small" style="margin:8px 0 0">กดสุ่มโจทย์ แล้วหมุนลูกจริงตามทีละท่า แอปจะเช็กให้เองว่าหมุนถูกไหม พอสุ่มเสร็จ เวลาจะเริ่มเดินเมื่อหมุนท่าแรก และหยุดเองเมื่อเรียงเสร็จ</p>
+          <button class="btn primary big" id="btScramble" style="margin-top:12px">สุ่มโจทย์ให้ทำตาม</button>
+        </div>
+        <div class="pad nobt" id="pad"></div>
+        <button class="btn primary big nobt" id="scramble" style="margin-top:14px">สุ่มโจทย์ใหม่</button>
+        <div class="row nobt">
+          <button class="btn" id="undo">ย้อน 1 ท่า</button>
+          <button class="btn" id="reset">เริ่มจากลูกที่เรียงแล้ว</button>
+        </div>
+        <button class="btn ghost big nobt" id="unscramble" style="margin-top:8px;font-size:15px;padding:12px">ย้อนท่าทั้งหมดจนเรียงให้ดู</button>
+      </div>
+    </section>
+
+    <section class="screen" id="solve" hidden>
+      <div class="card btonly">
+        <div class="btinfo"><svg class="i" viewBox="0 0 24 24"><path d="M7 7l10 10-5 4V3l5 4L7 17"/></svg><div>ลูกบลูทูธเชื่อมอยู่<small>ไม่ต้องถ่ายรูป แอปอ่านสีจากลูกได้เลย</small></div></div>
+        <button class="btn primary big" id="btSolve" style="margin-top:12px">หาวิธีแก้จากลูกบลูทูธ</button>
+        <p class="muted small" style="margin:10px 0 0">แอปจะบอกทีละท่า และเลื่อนไปท่าต่อไปเองเมื่อหมุนลูกจริงถูก ถ้าหมุนผิดจะเตือน</p>
+        <div id="btSolveMsg"></div>
+      </div>
+      <div class="card">
+        <p class="hold" id="solveHold"></p>
+        <div class="row resetrow">
+          <button class="btn ghost" id="resetColors2" type="button">คืนค่าสีมาตรฐาน</button>
+          <button class="btn ghost" id="clearAll2" type="button">ล้างที่กรอกทั้งหมด</button>
+        </div>
+        <div class="facebar" id="faceTabs"></div>
+        <div class="facehead"><h2 id="faceName"></h2><p id="faceHow"></p></div>
+        <div class="row photo-row" style="margin-top:14px">
+          <label class="btn primary big" for="camIn"><svg class="i" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>ถ่ายรูป</label>
+          <label class="btn big" for="photoIn"><svg class="i" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><circle cx="9" cy="10" r="1.8"/><path d="M20 16l-5-5-8 8"/></svg>เลือกรูป</label>
+        </div>
+        <input type="file" id="camIn" class="vh" accept="image/*" capture="environment">
+        <input type="file" id="photoIn" class="vh" accept="image/*">
+        <button class="linkbtn" id="liveBtn" type="button">กดแล้วไม่ขึ้นกล้อง? ลองใช้กล้องสดในหน้านี้</button>
+        <div class="or">หรือเลือกสีแล้วแตะระบายเอง</div>
+        <div class="side-label" id="labTop"></div>
+        <div class="grid9" id="grid9"></div>
+        <div class="side-label" id="labBottom"></div>
+        <div class="palette" id="palette"></div>
+        <div class="row">
+          <button class="btn" id="prevFace">ด้านก่อนหน้า</button>
+          <button class="btn" id="nextFace">ด้านถัดไป</button>
+        </div>
+      </div>
+      <div id="solveMsg" aria-live="polite"></div>
+      <button class="btn primary big solvebtn" id="solveBtn">หาวิธีแก้</button>
+      <details class="card" id="tools">
+        <summary>สีของรูบิคและเครื่องมือ</summary>
+        <p class="muted small" style="margin:10px 0 4px">ถ่ายรูปแล้วแอปจะตั้งสีกับชื่อสีจากจุดกลางให้เอง ถ้าไม่ตรง แตะช่องสีเพื่อเลือกเอง หรือพิมพ์ชื่อใหม่ได้</p>
+        <div id="colorRows"></div>
+        <div class="tools">
+          <button class="btn" id="colorReset">คืนค่าสีมาตรฐาน</button>
+          <button class="btn" id="fromApp">ใช้โจทย์ที่สุ่มในหน้าฝึก</button>
+          <div class="row" style="margin:0"><button class="btn" id="clearFace">ล้างด้านนี้</button><button class="btn" id="clearAll">ล้างทั้งหมด</button></div>
+        </div>
+      </details>
+    </section>
+  </main>
+</div>
+
+<div class="sheet-back" id="sheet" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <h3 id="sheetTitle">จัดกรอบให้ตรงหน้ารูบิค</h3>
+    <p>ลากกรอบให้วงกลมอยู่กลางสติกเกอร์ทุกช่อง ด้านบนของรูปต้องเป็น<span id="photoTop"></span></p>
+    <canvas id="pc"></canvas>
+    <label class="rangerow">ขนาดกรอบ <input type="range" id="psize" min="15" max="100" value="60"></label>
+    <div class="sheetbtns">
+      <button class="btn" id="pCancel">ยกเลิก</button>
+      <button class="btn" id="pRot">หมุน 90°</button>
+      <button class="btn primary" id="pUse">ใช้สีนี้</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet-back" id="liveSheet" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="liveTitle">
+    <h3 id="liveTitle">เล็งหน้ารูบิคให้พอดีกรอบ</h3>
+    <p>ด้านบนของภาพต้องเป็น<span id="liveTop"></span> แล้วกดถ่าย</p>
+    <div class="live" id="liveBox"><video id="video" playsinline muted autoplay></video><div class="guide" id="guide"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+    <div class="row" style="margin-top:14px"><button class="btn" id="liveCancel">ยกเลิก</button><button class="btn primary" id="liveShot">ถ่าย</button></div>
+  </div>
+</div>
+
+<div class="sheet-back" id="btSheet" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="btTitle">
+    <h3 id="btTitle">เชื่อมลูกบลูทูธ</h3>
+    <div id="btOff">
+      <p>รองรับ GiiKER Super Cube (i3, i3S, i3SE) และ Mi Smart Magic Cube ใช้ได้กับ Chrome บน Android หรือคอมพิวเตอร์</p>
+      <ol class="how">
+        <li>ชาร์จลูกด้วยหูฟังชาร์จ และเปิดบลูทูธกับตำแหน่ง (GPS) ในมือถือ</li>
+        <li>หมุนลูก 1–2 ครั้งให้ลูกตื่น</li>
+        <li>กด “เชื่อมต่อ” แล้วเลือกชื่อที่ขึ้นต้นด้วย Gi</li>
+      </ol>
+    </div>
+    <div id="btOnView" hidden>
+      <div class="btinfo"><svg class="i" viewBox="0 0 24 24"><path d="M7 7l10 10-5 4V3l5 4L7 17"/></svg><div><span id="btName"></span><small id="btBatt"></small></div></div>
+      <p>ถ้าลูกในจอไม่ตรงกับลูกจริง ให้เรียงลูกจริงให้เสร็จ แล้วกด “ตั้งให้ลูกนี้เป็นลูกที่เรียงแล้ว” ถ้าสีในจอไม่ตรงกับลูกจริง ตั้งสีได้ที่หน้า แก้ลูกจริง &gt; สีของรูบิคและเครื่องมือ</p>
+      <button class="btn" id="btReset" style="width:100%">ตั้งให้ลูกนี้เป็นลูกที่เรียงแล้ว</button>
+    </div>
+    <div id="btMsg"></div>
+    <div class="row" style="margin-top:14px">
+      <button class="btn" id="btClose">ปิด</button>
+      <button class="btn primary" id="btGo">เชื่อมต่อ</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<nav class="nav" aria-label="เมนูหลัก"><div role="tablist">
+  <button role="tab" id="navLearn" aria-selected="true" aria-controls="learn"><svg class="i" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5V5.5"/><path d="M8 7h8"/></svg>เรียน</button>
+  <button role="tab" id="navPractice" aria-selected="false" aria-controls="practice"><svg class="i" viewBox="0 0 24 24"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5"/></svg>ฝึก</button>
+  <button role="tab" id="navSolve" aria-selected="false" aria-controls="solve"><svg class="i" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>แก้ลูกจริง</button>
+</div></nav>
+
+<script>
+(function() {
+  // Centers
+  var B, BL, BR, Cube, D, DB, DBL, DF, DFR, DL, DLF, DR, DRB, F, FL, FR, L, R, U, UB, UBR, UF, UFL, UL, ULB, UR, URF, centerColor, centerFacelet, cornerColor, cornerFacelet, edgeColor, edgeFacelet;
+
+  [U, R, F, D, L, B] = [0, 1, 2, 3, 4, 5];
+
+  // Corners
+  [URF, UFL, ULB, UBR, DFR, DLF, DBL, DRB] = [0, 1, 2, 3, 4, 5, 6, 7];
+
+  // Edges
+  [UR, UF, UL, UB, DR, DF, DL, DB, FR, FL, BL, BR] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+
+  [centerFacelet, cornerFacelet, edgeFacelet] = (function() {
+    var _B, _D, _F, _L, _R, _U;
+    _U = function(x) {
+      return x - 1;
+    };
+    _R = function(x) {
+      return _U(9) + x;
+    };
+    _F = function(x) {
+      return _R(9) + x;
+    };
+    _D = function(x) {
+      return _F(9) + x;
+    };
+    _L = function(x) {
+      return _D(9) + x;
+    };
+    _B = function(x) {
+      return _L(9) + x;
+    };
+    return [
+      // Centers
+      [4,
+      13,
+      22,
+      31,
+      40,
+      49],
+      // Corners
+      [[_U(9),
+      _R(1),
+      _F(3)],
+      [_U(7),
+      _F(1),
+      _L(3)],
+      [_U(1),
+      _L(1),
+      _B(3)],
+      [_U(3),
+      _B(1),
+      _R(3)],
+      [_D(3),
+      _F(9),
+      _R(7)],
+      [_D(1),
+      _L(9),
+      _F(7)],
+      [_D(7),
+      _B(9),
+      _L(7)],
+      [_D(9),
+      _R(9),
+      _B(7)]],
+      // Edges
+      [[_U(6),
+      _R(2)],
+      [_U(8),
+      _F(2)],
+      [_U(4),
+      _L(2)],
+      [_U(2),
+      _B(2)],
+      [_D(6),
+      _R(8)],
+      [_D(2),
+      _F(8)],
+      [_D(4),
+      _L(8)],
+      [_D(8),
+      _B(8)],
+      [_F(6),
+      _R(4)],
+      [_F(4),
+      _L(6)],
+      [_B(6),
+      _L(4)],
+      [_B(4),
+      _R(6)]]
+    ];
+  })();
+
+  centerColor = ['U', 'R', 'F', 'D', 'L', 'B'];
+
+  cornerColor = [['U', 'R', 'F'], ['U', 'F', 'L'], ['U', 'L', 'B'], ['U', 'B', 'R'], ['D', 'F', 'R'], ['D', 'L', 'F'], ['D', 'B', 'L'], ['D', 'R', 'B']];
+
+  edgeColor = [['U', 'R'], ['U', 'F'], ['U', 'L'], ['U', 'B'], ['D', 'R'], ['D', 'F'], ['D', 'L'], ['D', 'B'], ['F', 'R'], ['F', 'L'], ['B', 'L'], ['B', 'R']];
+
+  Cube = (function() {
+    var faceNames, faceNums, parseAlg;
+
+    class Cube {
+      constructor(other) {
+        var x;
+        if (other != null) {
+          this.init(other);
+        } else {
+          this.identity();
+        }
+        // For moves to avoid allocating new objects each time
+        this.newCenter = (function() {
+          var k, results;
+          results = [];
+          for (x = k = 0; k <= 5; x = ++k) {
+            results.push(0);
+          }
+          return results;
+        })();
+        this.newCp = (function() {
+          var k, results;
+          results = [];
+          for (x = k = 0; k <= 7; x = ++k) {
+            results.push(0);
+          }
+          return results;
+        })();
+        this.newEp = (function() {
+          var k, results;
+          results = [];
+          for (x = k = 0; k <= 11; x = ++k) {
+            results.push(0);
+          }
+          return results;
+        })();
+        this.newCo = (function() {
+          var k, results;
+          results = [];
+          for (x = k = 0; k <= 7; x = ++k) {
+            results.push(0);
+          }
+          return results;
+        })();
+        this.newEo = (function() {
+          var k, results;
+          results = [];
+          for (x = k = 0; k <= 11; x = ++k) {
+            results.push(0);
+          }
+          return results;
+        })();
+      }
+
+      init(state) {
+        this.center = state.center.slice(0);
+        this.co = state.co.slice(0);
+        this.ep = state.ep.slice(0);
+        this.cp = state.cp.slice(0);
+        return this.eo = state.eo.slice(0);
+      }
+
+      identity() {
+        var x;
+        // Initialize to the identity cube
+        this.center = [0, 1, 2, 3, 4, 5];
+        this.cp = [0, 1, 2, 3, 4, 5, 6, 7];
+        this.co = (function() {
+          var k, results;
+          results = [];
+          for (x = k = 0; k <= 7; x = ++k) {
+            results.push(0);
+          }
+          return results;
+        })();
+        this.ep = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+        return this.eo = (function() {
+          var k, results;
+          results = [];
+          for (x = k = 0; k <= 11; x = ++k) {
+            results.push(0);
+          }
+          return results;
+        })();
+      }
+
+      toJSON() {
+        return {
+          center: this.center,
+          cp: this.cp,
+          co: this.co,
+          ep: this.ep,
+          eo: this.eo
+        };
+      }
+
+      asString() {
+        var corner, edge, i, k, l, m, n, o, ori, p, result;
+        result = [];
+        for (i = k = 0; k <= 5; i = ++k) {
+          result[9 * i + 4] = centerColor[this.center[i]];
+        }
+        for (i = l = 0; l <= 7; i = ++l) {
+          corner = this.cp[i];
+          ori = this.co[i];
+          for (n = m = 0; m <= 2; n = ++m) {
+            result[cornerFacelet[i][(n + ori) % 3]] = cornerColor[corner][n];
+          }
+        }
+        for (i = o = 0; o <= 11; i = ++o) {
+          edge = this.ep[i];
+          ori = this.eo[i];
+          for (n = p = 0; p <= 1; n = ++p) {
+            result[edgeFacelet[i][(n + ori) % 2]] = edgeColor[edge][n];
+          }
+        }
+        return result.join('');
+      }
+
+      static fromString(str) {
+        var col1, col2, cube, i, j, k, l, m, o, ori, p, q, r, ref;
+        cube = new Cube;
+        for (i = k = 0; k <= 5; i = ++k) {
+          for (j = l = 0; l <= 5; j = ++l) {
+            if (str[9 * i + 4] === centerColor[j]) {
+              cube.center[i] = j;
+            }
+          }
+        }
+        for (i = m = 0; m <= 7; i = ++m) {
+          for (ori = o = 0; o <= 2; ori = ++o) {
+            if ((ref = str[cornerFacelet[i][ori]]) === 'U' || ref === 'D') {
+              break;
+            }
+          }
+          col1 = str[cornerFacelet[i][(ori + 1) % 3]];
+          col2 = str[cornerFacelet[i][(ori + 2) % 3]];
+          for (j = p = 0; p <= 7; j = ++p) {
+            if (col1 === cornerColor[j][1] && col2 === cornerColor[j][2]) {
+              cube.cp[i] = j;
+              cube.co[i] = ori % 3;
+            }
+          }
+        }
+        for (i = q = 0; q <= 11; i = ++q) {
+          for (j = r = 0; r <= 11; j = ++r) {
+            if (str[edgeFacelet[i][0]] === edgeColor[j][0] && str[edgeFacelet[i][1]] === edgeColor[j][1]) {
+              cube.ep[i] = j;
+              cube.eo[i] = 0;
+              break;
+            }
+            if (str[edgeFacelet[i][0]] === edgeColor[j][1] && str[edgeFacelet[i][1]] === edgeColor[j][0]) {
+              cube.ep[i] = j;
+              cube.eo[i] = 1;
+              break;
+            }
+          }
+        }
+        return cube;
+      }
+
+      clone() {
+        return new Cube(this.toJSON());
+      }
+
+      // A class method returning a new random cube
+      static random() {
+        return new Cube().randomize();
+      }
+
+      isSolved() {
+        var c, cent, clone, e, k, l, m;
+        clone = this.clone();
+        clone.move(clone.upright());
+        for (cent = k = 0; k <= 5; cent = ++k) {
+          if (clone.center[cent] !== cent) {
+            return false;
+          }
+        }
+        for (c = l = 0; l <= 7; c = ++l) {
+          if (clone.cp[c] !== c) {
+            return false;
+          }
+          if (clone.co[c] !== 0) {
+            return false;
+          }
+        }
+        for (e = m = 0; m <= 11; e = ++m) {
+          if (clone.ep[e] !== e) {
+            return false;
+          }
+          if (clone.eo[e] !== 0) {
+            return false;
+          }
+        }
+        return true;
+      }
+
+      // Multiply this Cube with another Cube, restricted to centers.
+      centerMultiply(other) {
+        var from, k, to;
+        for (to = k = 0; k <= 5; to = ++k) {
+          from = other.center[to];
+          this.newCenter[to] = this.center[from];
+        }
+        [this.center, this.newCenter] = [this.newCenter, this.center];
+        return this;
+      }
+
+      // Multiply this Cube with another Cube, restricted to corners.
+      cornerMultiply(other) {
+        var from, k, to;
+        for (to = k = 0; k <= 7; to = ++k) {
+          from = other.cp[to];
+          this.newCp[to] = this.cp[from];
+          this.newCo[to] = (this.co[from] + other.co[to]) % 3;
+        }
+        [this.cp, this.newCp] = [this.newCp, this.cp];
+        [this.co, this.newCo] = [this.newCo, this.co];
+        return this;
+      }
+
+      // Multiply this Cube with another Cube, restricted to edges
+      edgeMultiply(other) {
+        var from, k, to;
+        for (to = k = 0; k <= 11; to = ++k) {
+          from = other.ep[to];
+          this.newEp[to] = this.ep[from];
+          this.newEo[to] = (this.eo[from] + other.eo[to]) % 2;
+        }
+        [this.ep, this.newEp] = [this.newEp, this.ep];
+        [this.eo, this.newEo] = [this.newEo, this.eo];
+        return this;
+      }
+
+      // Multiply this cube with another Cube
+      multiply(other) {
+        this.centerMultiply(other);
+        this.cornerMultiply(other);
+        this.edgeMultiply(other);
+        return this;
+      }
+
+      move(arg) {
+        var face, k, l, len, move, power, ref, ref1, x;
+        ref = parseAlg(arg);
+        for (k = 0, len = ref.length; k < len; k++) {
+          move = ref[k];
+          face = move / 3 | 0;
+          power = move % 3;
+          for (x = l = 0, ref1 = power; (0 <= ref1 ? l <= ref1 : l >= ref1); x = 0 <= ref1 ? ++l : --l) {
+            this.multiply(Cube.moves[face]);
+          }
+        }
+        return this;
+      }
+
+      upright() {
+        var clone, i, j, k, l, result;
+        clone = this.clone();
+        result = [];
+        for (i = k = 0; k <= 5; i = ++k) {
+          if (clone.center[i] === F) {
+            break;
+          }
+        }
+        switch (i) {
+          case D:
+            result.push("x");
+            break;
+          case U:
+            result.push("x'");
+            break;
+          case B:
+            result.push("x2");
+            break;
+          case R:
+            result.push("y");
+            break;
+          case L:
+            result.push("y'");
+        }
+        if (result.length) {
+          clone.move(result[0]);
+        }
+        for (j = l = 0; l <= 5; j = ++l) {
+          if (clone.center[j] === U) {
+            break;
+          }
+        }
+        switch (j) {
+          case L:
+            result.push("z");
+            break;
+          case R:
+            result.push("z'");
+            break;
+          case D:
+            result.push("z2");
+        }
+        return result.join(' ');
+      }
+
+      static inverse(arg) {
+        var face, k, len, move, power, result, str;
+        result = (function() {
+          var k, len, ref, results;
+          ref = parseAlg(arg);
+          results = [];
+          for (k = 0, len = ref.length; k < len; k++) {
+            move = ref[k];
+            face = move / 3 | 0;
+            power = move % 3;
+            results.push(face * 3 + -(power - 1) + 1);
+          }
+          return results;
+        })();
+        result.reverse();
+        if (typeof arg === 'string') {
+          str = '';
+          for (k = 0, len = result.length; k < len; k++) {
+            move = result[k];
+            face = move / 3 | 0;
+            power = move % 3;
+            str += faceNames[face];
+            if (power === 1) {
+              str += '2';
+            } else if (power === 2) {
+              str += "'";
+            }
+            str += ' ';
+          }
+          return str.substring(0, str.length - 1);
+        } else if (arg.length != null) {
+          return result;
+        } else {
+          return result[0];
+        }
+      }
+
+    };
+
+    Cube.prototype.randomize = (function() {
+      var arePermutationsValid, generateValidRandomOrientation, generateValidRandomPermutation, getNumSwaps, isOrientationValid, randint, randomizeOrientation, result, shuffle;
+      randint = function(min, max) {
+        return min + Math.floor(Math.random() * (max - min + 1));
+      };
+      // Fisher-Yates shuffle adapted from https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+      shuffle = function(array) {
+        var currentIndex, randomIndex, temporaryValue;
+        currentIndex = array.length;
+        // While there remain elements to shuffle...
+        while (currentIndex !== 0) {
+          // Pick a remaining element...
+          randomIndex = randint(0, currentIndex - 1);
+          currentIndex -= 1;
+          // And swap it with the current element.
+          temporaryValue = array[currentIndex];
+          [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+        }
+      };
+      getNumSwaps = function(arr) {
+        var cur, cycleLength, i, k, numSwaps, ref, seen, x;
+        numSwaps = 0;
+        seen = (function() {
+          var k, ref, results;
+          results = [];
+          for (x = k = 0, ref = arr.length - 1; (0 <= ref ? k <= ref : k >= ref); x = 0 <= ref ? ++k : --k) {
+            results.push(false);
+          }
+          return results;
+        })();
+        while (true) {
+          // We compute the cycle decomposition
+          cur = -1;
+          for (i = k = 0, ref = arr.length - 1; (0 <= ref ? k <= ref : k >= ref); i = 0 <= ref ? ++k : --k) {
+            if (!seen[i]) {
+              cur = i;
+              break;
+            }
+          }
+          if (cur === -1) {
+            break;
+          }
+          cycleLength = 0;
+          while (!seen[cur]) {
+            seen[cur] = true;
+            cycleLength++;
+            cur = arr[cur];
+          }
+          // A cycle is equivalent to cycleLength + 1 swaps
+          numSwaps += cycleLength + 1;
+        }
+        return numSwaps;
+      };
+      arePermutationsValid = function(cp, ep) {
+        var numSwaps;
+        numSwaps = getNumSwaps(ep) + getNumSwaps(cp);
+        return numSwaps % 2 === 0;
+      };
+      generateValidRandomPermutation = function(cp, ep) {
+        // Each shuffle only takes around 12 operations and there's a 50%
+        // chance of a valid permutation so it'll finish in very good time
+        shuffle(ep);
+        shuffle(cp);
+        while (!arePermutationsValid(cp, ep)) {
+          shuffle(ep);
+          shuffle(cp);
+        }
+      };
+      randomizeOrientation = function(arr, numOrientations) {
+        var i, k, ori, ref;
+        ori = 0;
+        for (i = k = 0, ref = arr.length - 1; (0 <= ref ? k <= ref : k >= ref); i = 0 <= ref ? ++k : --k) {
+          ori += (arr[i] = randint(0, numOrientations - 1));
+        }
+      };
+      isOrientationValid = function(arr, numOrientations) {
+        return arr.reduce(function(a, b) {
+          return a + b;
+        }) % numOrientations === 0;
+      };
+      generateValidRandomOrientation = function(co, eo) {
+        // There is a 1/2 and 1/3 probably respectively of each of these
+        // succeeding so the probability of them running 10 times before
+        // success is already only 1% and only gets exponentially lower
+        // and each generation is only in the 10s of operations which is nothing
+        randomizeOrientation(co, 3);
+        while (!isOrientationValid(co, 3)) {
+          randomizeOrientation(co, 3);
+        }
+        randomizeOrientation(eo, 2);
+        while (!isOrientationValid(eo, 2)) {
+          randomizeOrientation(eo, 2);
+        }
+      };
+      result = function() {
+        generateValidRandomPermutation(this.cp, this.ep);
+        generateValidRandomOrientation(this.co, this.eo);
+        return this;
+      };
+      return result;
+    })();
+
+    Cube.moves = [
+      {
+        // U
+        center: [0, 1, 2, 3, 4, 5],
+        cp: [UBR,
+      URF,
+      UFL,
+      ULB,
+      DFR,
+      DLF,
+      DBL,
+      DRB],
+        co: [0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0],
+        ep: [UB,
+      UR,
+      UF,
+      UL,
+      DR,
+      DF,
+      DL,
+      DB,
+      FR,
+      FL,
+      BL,
+      BR],
+        eo: [0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0]
+      },
+      {
+        // R
+        center: [0, 1, 2, 3, 4, 5],
+        cp: [DFR,
+      UFL,
+      ULB,
+      URF,
+      DRB,
+      DLF,
+      DBL,
+      UBR],
+        co: [2,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2],
+        ep: [FR,
+      UF,
+      UL,
+      UB,
+      BR,
+      DF,
+      DL,
+      DB,
+      DR,
+      FL,
+      BL,
+      UR],
+        eo: [0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0]
+      },
+      {
+        // F
+        center: [0, 1, 2, 3, 4, 5],
+        cp: [UFL,
+      DLF,
+      ULB,
+      UBR,
+      URF,
+      DFR,
+      DBL,
+      DRB],
+        co: [1,
+      2,
+      0,
+      0,
+      2,
+      1,
+      0,
+      0],
+        ep: [UR,
+      FL,
+      UL,
+      UB,
+      DR,
+      FR,
+      DL,
+      DB,
+      UF,
+      DF,
+      BL,
+      BR],
+        eo: [0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0]
+      },
+      {
+        // D
+        center: [0, 1, 2, 3, 4, 5],
+        cp: [URF,
+      UFL,
+      ULB,
+      UBR,
+      DLF,
+      DBL,
+      DRB,
+      DFR],
+        co: [0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0],
+        ep: [UR,
+      UF,
+      UL,
+      UB,
+      DF,
+      DL,
+      DB,
+      DR,
+      FR,
+      FL,
+      BL,
+      BR],
+        eo: [0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0]
+      },
+      {
+        // L
+        center: [0, 1, 2, 3, 4, 5],
+        cp: [URF,
+      ULB,
+      DBL,
+      UBR,
+      DFR,
+      UFL,
+      DLF,
+      DRB],
+        co: [0,
+      1,
+      2,
+      0,
+      0,
+      2,
+      1,
+      0],
+        ep: [UR,
+      UF,
+      BL,
+      UB,
+      DR,
+      DF,
+      FL,
+      DB,
+      FR,
+      UL,
+      DL,
+      BR],
+        eo: [0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0]
+      },
+      {
+        // B
+        center: [0, 1, 2, 3, 4, 5],
+        cp: [URF,
+      UFL,
+      UBR,
+      DRB,
+      DFR,
+      DLF,
+      ULB,
+      DBL],
+        co: [0,
+      0,
+      1,
+      2,
+      0,
+      0,
+      2,
+      1],
+        ep: [UR,
+      UF,
+      UL,
+      BR,
+      DR,
+      DF,
+      DL,
+      BL,
+      FR,
+      FL,
+      UB,
+      DB],
+        eo: [0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      1]
+      },
+      {
+        // E
+        center: [U,
+      F,
+      L,
+      D,
+      B,
+      R],
+        cp: [URF,
+      UFL,
+      ULB,
+      UBR,
+      DFR,
+      DLF,
+      DBL,
+      DRB],
+        co: [0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0],
+        ep: [UR,
+      UF,
+      UL,
+      UB,
+      DR,
+      DF,
+      DL,
+      DB,
+      FL,
+      BL,
+      BR,
+      FR],
+        eo: [0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1]
+      },
+      {
+        // M
+        center: [B,
+      R,
+      U,
+      F,
+      L,
+      D],
+        cp: [URF,
+      UFL,
+      ULB,
+      UBR,
+      DFR,
+      DLF,
+      DBL,
+      DRB],
+        co: [0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0],
+        ep: [UR,
+      UB,
+      UL,
+      DB,
+      DR,
+      UF,
+      DL,
+      DF,
+      FR,
+      FL,
+      BL,
+      BR],
+        eo: [0,
+      1,
+      0,
+      1,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0]
+      },
+      {
+        // S
+        center: [L,
+      U,
+      F,
+      R,
+      D,
+      B],
+        cp: [URF,
+      UFL,
+      ULB,
+      UBR,
+      DFR,
+      DLF,
+      DBL,
+      DRB],
+        co: [0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0],
+        ep: [UL,
+      UF,
+      DL,
+      UB,
+      UR,
+      DF,
+      DR,
+      DB,
+      FR,
+      FL,
+      BL,
+      BR],
+        eo: [1,
+      0,
+      1,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0]
+      }
+    ];
+
+    faceNums = {
+      U: 0,
+      R: 1,
+      F: 2,
+      D: 3,
+      L: 4,
+      B: 5,
+      E: 6,
+      M: 7,
+      S: 8,
+      x: 9,
+      y: 10,
+      z: 11,
+      u: 12,
+      r: 13,
+      f: 14,
+      d: 15,
+      l: 16,
+      b: 17
+    };
+
+    faceNames = {
+      0: 'U',
+      1: 'R',
+      2: 'F',
+      3: 'D',
+      4: 'L',
+      5: 'B',
+      6: 'E',
+      7: 'M',
+      8: 'S',
+      9: 'x',
+      10: 'y',
+      11: 'z',
+      12: 'u',
+      13: 'r',
+      14: 'f',
+      15: 'd',
+      16: 'l',
+      17: 'b'
+    };
+
+    parseAlg = function(arg) {
+      var k, len, move, part, power, ref, results;
+      if (typeof arg === 'string') {
+        ref = arg.split(/\s+/);
+        // String
+        results = [];
+        for (k = 0, len = ref.length; k < len; k++) {
+          part = ref[k];
+          if (part.length === 0) {
+            // First and last can be empty
+            continue;
+          }
+          if (part.length > 2) {
+            throw new Error(`Invalid move: ${part}`);
+          }
+          move = faceNums[part[0]];
+          if (move === void 0) {
+            throw new Error(`Invalid move: ${part}`);
+          }
+          if (part.length === 1) {
+            power = 0;
+          } else {
+            if (part[1] === '2') {
+              power = 1;
+            } else if (part[1] === "'") {
+              power = 2;
+            } else {
+              throw new Error(`Invalid move: ${part}`);
+            }
+          }
+          results.push(move * 3 + power);
+        }
+        return results;
+      } else if (arg.length != null) {
+        // Already an array
+        return arg;
+      } else {
+        // A single move
+        return [arg];
+      }
+    };
+
+    // x
+    Cube.moves.push(new Cube().move("R M' L'").toJSON());
+
+    // y
+    Cube.moves.push(new Cube().move("U E' D'").toJSON());
+
+    // z
+    Cube.moves.push(new Cube().move("F S B'").toJSON());
+
+    // u
+    Cube.moves.push(new Cube().move("U E'").toJSON());
+
+    // r
+    Cube.moves.push(new Cube().move("R M'").toJSON());
+
+    // f
+    Cube.moves.push(new Cube().move("F S").toJSON());
+
+    // d
+    Cube.moves.push(new Cube().move("D E").toJSON());
+
+    // l
+    Cube.moves.push(new Cube().move("L M").toJSON());
+
+    // b
+    Cube.moves.push(new Cube().move("B S'").toJSON());
+
+    return Cube;
+
+  }).call(this);
+
+  //# Globals
+  if (typeof module !== "undefined" && module !== null) {
+    module.exports = Cube;
+  } else {
+    this.Cube = Cube;
+  }
+
+}).call(this);
+
+(function() {
+  var B, BL, BR, Cnk, Cube, D, DB, DBL, DF, DFR, DL, DLF, DR, DRB, F, FL, FR, Include, L, N_FLIP, N_FRtoBR, N_PARITY, N_SLICE1, N_SLICE2, N_TWIST, N_UBtoDF, N_URFtoDLF, N_URtoDF, N_URtoUL, R, U, UB, UBR, UF, UFL, UL, ULB, UR, URF, allMoves1, allMoves2, computeMoveTable, computePruningTable, faceNames, faceNums, factorial, key, max, mergeURtoDF, moveTableParams, nextMoves1, nextMoves2, permutationIndex, pruning, pruningTableParams, rotateLeft, rotateRight, value,
+    indexOf = [].indexOf;
+
+  Cube = this.Cube || require('./cube');
+
+  // Centers
+  [U, R, F, D, L, B] = [0, 1, 2, 3, 4, 5];
+
+  // Corners
+  [URF, UFL, ULB, UBR, DFR, DLF, DBL, DRB] = [0, 1, 2, 3, 4, 5, 6, 7];
+
+  // Edges
+  [UR, UF, UL, UB, DR, DF, DL, DB, FR, FL, BL, BR] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+
+  //# Helpers
+
+  // n choose k, i.e. the binomial coeffiecient
+  Cnk = function(n, k) {
+    var i, j, s;
+    if (n < k) {
+      return 0;
+    }
+    if (k > n / 2) {
+      k = n - k;
+    }
+    s = 1;
+    i = n;
+    j = 1;
+    while (i !== n - k) {
+      s *= i;
+      s /= j;
+      i--;
+      j++;
+    }
+    return s;
+  };
+
+  // n!
+  factorial = function(n) {
+    var f, i, m, ref;
+    f = 1;
+    for (i = m = 2, ref = n; (2 <= ref ? m <= ref : m >= ref); i = 2 <= ref ? ++m : --m) {
+      f *= i;
+    }
+    return f;
+  };
+
+  // Maximum of two values
+  max = function(a, b) {
+    if (a > b) {
+      return a;
+    } else {
+      return b;
+    }
+  };
+
+  // Rotate elements between l and r left by one place
+  rotateLeft = function(array, l, r) {
+    var i, m, ref, ref1, tmp;
+    tmp = array[l];
+    for (i = m = ref = l, ref1 = r - 1; (ref <= ref1 ? m <= ref1 : m >= ref1); i = ref <= ref1 ? ++m : --m) {
+      array[i] = array[i + 1];
+    }
+    return array[r] = tmp;
+  };
+
+  // Rotate elements between l and r right by one place
+  rotateRight = function(array, l, r) {
+    var i, m, ref, ref1, tmp;
+    tmp = array[r];
+    for (i = m = ref = r, ref1 = l + 1; (ref <= ref1 ? m <= ref1 : m >= ref1); i = ref <= ref1 ? ++m : --m) {
+      array[i] = array[i - 1];
+    }
+    return array[l] = tmp;
+  };
+
+  // Generate a function that computes permutation indices.
+
+  // The permutation index actually encodes two indices: Combination,
+  // i.e. positions of the cubies start..end (A) and their respective
+  // permutation (B). The maximum value for B is
+
+  //   maxB = (end - start + 1)!
+
+  // and the index is A * maxB + B
+  permutationIndex = function(context, start, end, fromEnd = false) {
+    var i, maxAll, maxB, maxOur, our, permName;
+    maxOur = end - start;
+    maxB = factorial(maxOur + 1);
+    if (context === 'corners') {
+      maxAll = 7;
+      permName = 'cp';
+    } else {
+      maxAll = 11;
+      permName = 'ep';
+    }
+    our = (function() {
+      var m, ref, results;
+      results = [];
+      for (i = m = 0, ref = maxOur; (0 <= ref ? m <= ref : m >= ref); i = 0 <= ref ? ++m : --m) {
+        results.push(0);
+      }
+      return results;
+    })();
+    return function(index) {
+      var a, b, c, j, k, m, o, p, perm, q, ref, ref1, ref10, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9, t, u, w, x, y, z;
+      if (index != null) {
+        for (i = m = 0, ref = maxOur; (0 <= ref ? m <= ref : m >= ref); i = 0 <= ref ? ++m : --m) {
+          // Reset our to [start..end]
+          our[i] = i + start;
+        }
+        b = index % maxB; // permutation
+        a = index / maxB | 0; // combination
+        
+        // Invalidate all edges
+        perm = this[permName];
+        for (i = o = 0, ref1 = maxAll; (0 <= ref1 ? o <= ref1 : o >= ref1); i = 0 <= ref1 ? ++o : --o) {
+          perm[i] = -1;
+        }
+// Generate permutation from index b
+        for (j = p = 1, ref2 = maxOur; (1 <= ref2 ? p <= ref2 : p >= ref2); j = 1 <= ref2 ? ++p : --p) {
+          k = b % (j + 1);
+          b = b / (j + 1) | 0;
+          // TODO: Implement rotateRightBy(our, 0, j, k)
+          while (k > 0) {
+            rotateRight(our, 0, j);
+            k--;
+          }
+        }
+        // Generate combination and set our edges
+        x = maxOur;
+        if (fromEnd) {
+          for (j = q = 0, ref3 = maxAll; (0 <= ref3 ? q <= ref3 : q >= ref3); j = 0 <= ref3 ? ++q : --q) {
+            c = Cnk(maxAll - j, x + 1);
+            if (a - c >= 0) {
+              perm[j] = our[maxOur - x];
+              a -= c;
+              x--;
+            }
+          }
+        } else {
+          for (j = t = ref4 = maxAll; (ref4 <= 0 ? t <= 0 : t >= 0); j = ref4 <= 0 ? ++t : --t) {
+            c = Cnk(j, x + 1);
+            if (a - c >= 0) {
+              perm[j] = our[x];
+              a -= c;
+              x--;
+            }
+          }
+        }
+        return this;
+      } else {
+        perm = this[permName];
+        for (i = u = 0, ref5 = maxOur; (0 <= ref5 ? u <= ref5 : u >= ref5); i = 0 <= ref5 ? ++u : --u) {
+          our[i] = -1;
+        }
+        a = b = x = 0;
+        // Compute the index a < ((maxAll + 1) choose (maxOur + 1)) and
+        // the permutation
+        if (fromEnd) {
+          for (j = w = ref6 = maxAll; (ref6 <= 0 ? w <= 0 : w >= 0); j = ref6 <= 0 ? ++w : --w) {
+            if ((start <= (ref7 = perm[j]) && ref7 <= end)) {
+              a += Cnk(maxAll - j, x + 1);
+              our[maxOur - x] = perm[j];
+              x++;
+            }
+          }
+        } else {
+          for (j = y = 0, ref8 = maxAll; (0 <= ref8 ? y <= ref8 : y >= ref8); j = 0 <= ref8 ? ++y : --y) {
+            if ((start <= (ref9 = perm[j]) && ref9 <= end)) {
+              a += Cnk(j, x + 1);
+              our[x] = perm[j];
+              x++;
+            }
+          }
+        }
+// Compute the index b < (maxOur + 1)! for the permutation
+        for (j = z = ref10 = maxOur; (ref10 <= 0 ? z <= 0 : z >= 0); j = ref10 <= 0 ? ++z : --z) {
+          k = 0;
+          while (our[j] !== start + j) {
+            rotateLeft(our, 0, j);
+            k++;
+          }
+          b = (j + 1) * b + k;
+        }
+        return a * maxB + b;
+      }
+    };
+  };
+
+  Include = {
+    // The twist of the 8 corners, 0 <= twist < 3^7. The orientation of
+    // the DRB corner is fully determined by the orientation of the other
+    // corners.
+    twist: function(twist) {
+      var i, m, o, ori, parity, v;
+      if (twist != null) {
+        parity = 0;
+        for (i = m = 6; m >= 0; i = --m) {
+          ori = twist % 3;
+          twist = (twist / 3) | 0;
+          this.co[i] = ori;
+          parity += ori;
+        }
+        this.co[7] = (3 - parity % 3) % 3;
+        return this;
+      } else {
+        v = 0;
+        for (i = o = 0; o <= 6; i = ++o) {
+          v = 3 * v + this.co[i];
+        }
+        return v;
+      }
+    },
+    // The flip of the 12 edges, 0 <= flip < 2^11. The orientation of the
+    // BR edge is fully determined by the orientation of the other edges.
+    flip: function(flip) {
+      var i, m, o, ori, parity, v;
+      if (flip != null) {
+        parity = 0;
+        for (i = m = 10; m >= 0; i = --m) {
+          ori = flip % 2;
+          flip = flip / 2 | 0;
+          this.eo[i] = ori;
+          parity += ori;
+        }
+        this.eo[11] = (2 - parity % 2) % 2;
+        return this;
+      } else {
+        v = 0;
+        for (i = o = 0; o <= 10; i = ++o) {
+          v = 2 * v + this.eo[i];
+        }
+        return v;
+      }
+    },
+    // Parity of the corner permutation
+    cornerParity: function() {
+      var i, j, m, o, ref, ref1, ref2, ref3, s;
+      s = 0;
+      for (i = m = ref = DRB, ref1 = URF + 1; (ref <= ref1 ? m <= ref1 : m >= ref1); i = ref <= ref1 ? ++m : --m) {
+        for (j = o = ref2 = i - 1, ref3 = URF; (ref2 <= ref3 ? o <= ref3 : o >= ref3); j = ref2 <= ref3 ? ++o : --o) {
+          if (this.cp[j] > this.cp[i]) {
+            s++;
+          }
+        }
+      }
+      return s % 2;
+    },
+    // Parity of the edges permutation. Parity of corners and edges are
+    // the same if the cube is solvable.
+    edgeParity: function() {
+      var i, j, m, o, ref, ref1, ref2, ref3, s;
+      s = 0;
+      for (i = m = ref = BR, ref1 = UR + 1; (ref <= ref1 ? m <= ref1 : m >= ref1); i = ref <= ref1 ? ++m : --m) {
+        for (j = o = ref2 = i - 1, ref3 = UR; (ref2 <= ref3 ? o <= ref3 : o >= ref3); j = ref2 <= ref3 ? ++o : --o) {
+          if (this.ep[j] > this.ep[i]) {
+            s++;
+          }
+        }
+      }
+      return s % 2;
+    },
+    // Permutation of the six corners URF, UFL, ULB, UBR, DFR, DLF
+    URFtoDLF: permutationIndex('corners', URF, DLF),
+    // Permutation of the three edges UR, UF, UL
+    URtoUL: permutationIndex('edges', UR, UL),
+    // Permutation of the three edges UB, DR, DF
+    UBtoDF: permutationIndex('edges', UB, DF),
+    // Permutation of the six edges UR, UF, UL, UB, DR, DF
+    URtoDF: permutationIndex('edges', UR, DF),
+    // Permutation of the equator slice edges FR, FL, BL and BR
+    FRtoBR: permutationIndex('edges', FR, BR, true)
+  };
+
+  for (key in Include) {
+    value = Include[key];
+    Cube.prototype[key] = value;
+  }
+
+  computeMoveTable = function(context, coord, size) {
+    var apply, cube, i, inner, j, k, m, move, o, p, ref, results;
+    // Loop through all valid values for the coordinate, setting cube's
+    // state in each iteration. Then apply each of the 18 moves to the
+    // cube, and compute the resulting coordinate.
+    apply = context === 'corners' ? 'cornerMultiply' : 'edgeMultiply';
+    cube = new Cube;
+    results = [];
+    for (i = m = 0, ref = size - 1; (0 <= ref ? m <= ref : m >= ref); i = 0 <= ref ? ++m : --m) {
+      cube[coord](i);
+      inner = [];
+      for (j = o = 0; o <= 5; j = ++o) {
+        move = Cube.moves[j];
+        for (k = p = 0; p <= 2; k = ++p) {
+          cube[apply](move);
+          inner.push(cube[coord]());
+        }
+        // 4th face turn restores the cube
+        cube[apply](move);
+      }
+      results.push(inner);
+    }
+    return results;
+  };
+
+  // Because we only have the phase 2 URtoDF coordinates, we need to
+  // merge the URtoUL and UBtoDF coordinates to URtoDF in the beginning
+  // of phase 2.
+  mergeURtoDF = (function() {
+    var a, b;
+    a = new Cube;
+    b = new Cube;
+    return function(URtoUL, UBtoDF) {
+      var i, m;
+      // Collisions can be found because unset are set to -1
+      a.URtoUL(URtoUL);
+      b.UBtoDF(UBtoDF);
+      for (i = m = 0; m <= 7; i = ++m) {
+        if (a.ep[i] !== -1) {
+          if (b.ep[i] !== -1) {
+            return -1; // collision
+          } else {
+            b.ep[i] = a.ep[i];
+          }
+        }
+      }
+      return b.URtoDF();
+    };
+  })();
+
+  N_TWIST = 2187; // 3^7 corner orientations
+
+  N_FLIP = 2048; // 2^11 possible edge flips
+
+  N_PARITY = 2; // 2 possible parities
+
+  N_FRtoBR = 11880; // 12!/(12-4)! permutations of FR..BR edges
+
+  N_SLICE1 = 495; // (12 choose 4) possible positions of FR..BR edges
+
+  N_SLICE2 = 24; // 4! permutations of FR..BR edges in phase 2
+
+  N_URFtoDLF = 20160; // 8!/(8-6)! permutations of URF..DLF corners
+
+  
+  // The URtoDF move table is only computed for phase 2 because the full
+  // table would have >650000 entries
+  N_URtoDF = 20160; // 8!/(8-6)! permutation of UR..DF edges in phase 2
+
+  N_URtoUL = 1320; // 12!/(12-3)! permutations of UR..UL edges
+
+  N_UBtoDF = 1320; // 12!/(12-3)! permutations of UB..DF edges
+
+  
+  // The move table for parity is so small that it's included here
+  Cube.moveTables = {
+    parity: [[1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1], [0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0]],
+    twist: null,
+    flip: null,
+    FRtoBR: null,
+    URFtoDLF: null,
+    URtoDF: null,
+    URtoUL: null,
+    UBtoDF: null,
+    mergeURtoDF: null
+  };
+
+  // Other move tables are computed on the fly
+  moveTableParams = {
+    // name: [scope, size]
+    twist: ['corners', N_TWIST],
+    flip: ['edges', N_FLIP],
+    FRtoBR: ['edges', N_FRtoBR],
+    URFtoDLF: ['corners', N_URFtoDLF],
+    URtoDF: ['edges', N_URtoDF],
+    URtoUL: ['edges', N_URtoUL],
+    UBtoDF: ['edges', N_UBtoDF],
+    mergeURtoDF: []
+  };
+
+  Cube.computeMoveTables = function(...tables) {
+    var len, m, name, scope, size, tableName;
+    if (tables.length === 0) {
+      tables = (function() {
+        var results;
+        results = [];
+        for (name in moveTableParams) {
+          results.push(name);
+        }
+        return results;
+      })();
+    }
+    for (m = 0, len = tables.length; m < len; m++) {
+      tableName = tables[m];
+      if (this.moveTables[tableName] !== null) {
+        // Already computed
+        continue;
+      }
+      if (tableName === 'mergeURtoDF') {
+        this.moveTables.mergeURtoDF = (function() {
+          var UBtoDF, URtoUL, o, results;
+          results = [];
+          for (URtoUL = o = 0; o <= 335; URtoUL = ++o) {
+            results.push((function() {
+              var p, results1;
+              results1 = [];
+              for (UBtoDF = p = 0; p <= 335; UBtoDF = ++p) {
+                results1.push(mergeURtoDF(URtoUL, UBtoDF));
+              }
+              return results1;
+            })());
+          }
+          return results;
+        })();
+      } else {
+        [scope, size] = moveTableParams[tableName];
+        this.moveTables[tableName] = computeMoveTable(scope, tableName, size);
+      }
+    }
+    return this;
+  };
+
+  // Phase 1: All moves are valid
+  allMoves1 = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
+
+  // The list of next valid phase 1 moves when the given face was turned
+  // in the last move
+  nextMoves1 = (function() {
+    var face, lastFace, m, next, o, p, power, results;
+    results = [];
+    for (lastFace = m = 0; m <= 5; lastFace = ++m) {
+      next = [];
+// Don't allow commuting moves, e.g. U U'. Also make sure that
+// opposite faces are always moved in the same order, i.e. allow
+// U D but no D U. This avoids sequences like U D U'.
+      for (face = o = 0; o <= 5; face = ++o) {
+        if (face !== lastFace && face !== lastFace - 3) {
+// single, double or inverse move
+          for (power = p = 0; p <= 2; power = ++p) {
+            next.push(face * 3 + power);
+          }
+        }
+      }
+      results.push(next);
+    }
+    return results;
+  })();
+
+  // Phase 2: Double moves of all faces plus quarter moves of U and D
+  allMoves2 = [0, 1, 2, 4, 7, 9, 10, 11, 13, 16];
+
+  nextMoves2 = (function() {
+    var face, lastFace, len, m, next, o, p, power, powers, results;
+    results = [];
+    for (lastFace = m = 0; m <= 5; lastFace = ++m) {
+      next = [];
+      for (face = o = 0; o <= 5; face = ++o) {
+        if (!(face !== lastFace && face !== lastFace - 3)) {
+          continue;
+        }
+        // Allow all moves of U and D and double moves of others
+        powers = face === 0 || face === 3 ? [0, 1, 2] : [1];
+        for (p = 0, len = powers.length; p < len; p++) {
+          power = powers[p];
+          next.push(face * 3 + power);
+        }
+      }
+      results.push(next);
+    }
+    return results;
+  })();
+
+  // 8 values are encoded in one number
+  pruning = function(table, index, value) {
+    var pos, shift, slot;
+    pos = index % 8;
+    slot = index >> 3;
+    shift = pos << 2;
+    if (value != null) {
+      // Set
+      table[slot] &= ~(0xF << shift);
+      table[slot] |= value << shift;
+      return value;
+    } else {
+      // Get
+      return (table[slot] & (0xF << shift)) >>> shift;
+    }
+  };
+
+  computePruningTable = function(phase, size, currentCoords, nextIndex) {
+    var current, depth, done, index, len, m, move, moves, next, o, ref, table, x;
+    // Initialize all values to 0xF
+    table = (function() {
+      var m, ref, results;
+      results = [];
+      for (x = m = 0, ref = Math.ceil(size / 8) - 1; (0 <= ref ? m <= ref : m >= ref); x = 0 <= ref ? ++m : --m) {
+        results.push(0xFFFFFFFF);
+      }
+      return results;
+    })();
+    if (phase === 1) {
+      moves = allMoves1;
+    } else {
+      moves = allMoves2;
+    }
+    depth = 0;
+    pruning(table, 0, depth);
+    done = 1;
+    // In each iteration, take each state found in the previous depth and
+    // compute the next state. Stop when all states have been assigned a
+    // depth.
+    while (done !== size) {
+      for (index = m = 0, ref = size - 1; (0 <= ref ? m <= ref : m >= ref); index = 0 <= ref ? ++m : --m) {
+        if (!(pruning(table, index) === depth)) {
+          continue;
+        }
+        current = currentCoords(index);
+        for (o = 0, len = moves.length; o < len; o++) {
+          move = moves[o];
+          next = nextIndex(current, move);
+          if (pruning(table, next) === 0xF) {
+            pruning(table, next, depth + 1);
+            done++;
+          }
+        }
+      }
+      depth++;
+    }
+    return table;
+  };
+
+  Cube.pruningTables = {
+    sliceTwist: null,
+    sliceFlip: null,
+    sliceURFtoDLFParity: null,
+    sliceURtoDFParity: null
+  };
+
+  pruningTableParams = {
+    // name: [phase, size, currentCoords, nextIndex]
+    sliceTwist: [
+      1,
+      N_SLICE1 * N_TWIST,
+      function(index) {
+        return [index % N_SLICE1,
+      index / N_SLICE1 | 0];
+      },
+      function(current,
+      move) {
+        var newSlice,
+      newTwist,
+      slice,
+      twist;
+        [slice,
+      twist] = current;
+        newSlice = Cube.moveTables.FRtoBR[slice * 24][move] / 24 | 0;
+        newTwist = Cube.moveTables.twist[twist][move];
+        return newTwist * N_SLICE1 + newSlice;
+      }
+    ],
+    sliceFlip: [
+      1,
+      N_SLICE1 * N_FLIP,
+      function(index) {
+        return [index % N_SLICE1,
+      index / N_SLICE1 | 0];
+      },
+      function(current,
+      move) {
+        var flip,
+      newFlip,
+      newSlice,
+      slice;
+        [slice,
+      flip] = current;
+        newSlice = Cube.moveTables.FRtoBR[slice * 24][move] / 24 | 0;
+        newFlip = Cube.moveTables.flip[flip][move];
+        return newFlip * N_SLICE1 + newSlice;
+      }
+    ],
+    sliceURFtoDLFParity: [
+      2,
+      N_SLICE2 * N_URFtoDLF * N_PARITY,
+      function(index) {
+        return [index % 2,
+      (index / 2 | 0) % N_SLICE2,
+      (index / 2 | 0) / N_SLICE2 | 0];
+      },
+      function(current,
+      move) {
+        var URFtoDLF,
+      newParity,
+      newSlice,
+      newURFtoDLF,
+      parity,
+      slice;
+        [parity,
+      slice,
+      URFtoDLF] = current;
+        newParity = Cube.moveTables.parity[parity][move];
+        newSlice = Cube.moveTables.FRtoBR[slice][move];
+        newURFtoDLF = Cube.moveTables.URFtoDLF[URFtoDLF][move];
+        return (newURFtoDLF * N_SLICE2 + newSlice) * 2 + newParity;
+      }
+    ],
+    sliceURtoDFParity: [
+      2,
+      N_SLICE2 * N_URtoDF * N_PARITY,
+      function(index) {
+        return [index % 2,
+      (index / 2 | 0) % N_SLICE2,
+      (index / 2 | 0) / N_SLICE2 | 0];
+      },
+      function(current,
+      move) {
+        var URtoDF,
+      newParity,
+      newSlice,
+      newURtoDF,
+      parity,
+      slice;
+        [parity,
+      slice,
+      URtoDF] = current;
+        newParity = Cube.moveTables.parity[parity][move];
+        newSlice = Cube.moveTables.FRtoBR[slice][move];
+        newURtoDF = Cube.moveTables.URtoDF[URtoDF][move];
+        return (newURtoDF * N_SLICE2 + newSlice) * 2 + newParity;
+      }
+    ]
+  };
+
+  Cube.computePruningTables = function(...tables) {
+    var len, m, name, params, tableName;
+    if (tables.length === 0) {
+      tables = (function() {
+        var results;
+        results = [];
+        for (name in pruningTableParams) {
+          results.push(name);
+        }
+        return results;
+      })();
+    }
+    for (m = 0, len = tables.length; m < len; m++) {
+      tableName = tables[m];
+      if (this.pruningTables[tableName] !== null) {
+        // Already computed
+        continue;
+      }
+      params = pruningTableParams[tableName];
+      this.pruningTables[tableName] = computePruningTable(...params);
+    }
+    return this;
+  };
+
+  Cube.initSolver = function() {
+    Cube.computeMoveTables();
+    return Cube.computePruningTables();
+  };
+
+  Cube.prototype.solveUpright = function(maxDepth = 22) {
+    var State, freeStates, moveNames, phase1, phase1search, phase2, phase2search, solution, state, x;
+    // Names for all moves, i.e. U, U2, U', F, F2, ...
+    moveNames = (function() {
+      var face, faceName, m, o, power, powerName, result;
+      faceName = ['U', 'R', 'F', 'D', 'L', 'B'];
+      powerName = ['', '2', "'"];
+      result = [];
+      for (face = m = 0; m <= 5; face = ++m) {
+        for (power = o = 0; o <= 2; power = ++o) {
+          result.push(faceName[face] + powerName[power]);
+        }
+      }
+      return result;
+    })();
+    State = class State {
+      constructor(cube) {
+        this.parent = null;
+        this.lastMove = null;
+        this.depth = 0;
+        if (cube) {
+          this.init(cube);
+        }
+      }
+
+      init(cube) {
+        // Phase 1 coordinates
+        this.flip = cube.flip();
+        this.twist = cube.twist();
+        this.slice = cube.FRtoBR() / N_SLICE2 | 0;
+        // Phase 2 coordinates
+        this.parity = cube.cornerParity();
+        this.URFtoDLF = cube.URFtoDLF();
+        this.FRtoBR = cube.FRtoBR();
+        // These are later merged to URtoDF when phase 2 begins
+        this.URtoUL = cube.URtoUL();
+        this.UBtoDF = cube.UBtoDF();
+        return this;
+      }
+
+      solution() {
+        if (this.parent) {
+          return this.parent.solution() + moveNames[this.lastMove] + ' ';
+        } else {
+          return '';
+        }
+      }
+
+      //# Helpers
+      move(table, index, move) {
+        return Cube.moveTables[table][index][move];
+      }
+
+      pruning(table, index) {
+        return pruning(Cube.pruningTables[table], index);
+      }
+
+      //# Phase 1
+
+      // Return the next valid phase 1 moves for this state
+      moves1() {
+        if (this.lastMove !== null) {
+          return nextMoves1[this.lastMove / 3 | 0];
+        } else {
+          return allMoves1;
+        }
+      }
+
+      // Compute the minimum number of moves to the end of phase 1
+      minDist1() {
+        var d1, d2;
+        // The maximum number of moves to the end of phase 1 wrt. the
+        // combination flip and slice coordinates only
+        d1 = this.pruning('sliceFlip', N_SLICE1 * this.flip + this.slice);
+        // The combination of twist and slice coordinates
+        d2 = this.pruning('sliceTwist', N_SLICE1 * this.twist + this.slice);
+        // The true minimal distance is the maximum of these two
+        return max(d1, d2);
+      }
+
+      // Compute the next phase 1 state for the given move
+      next1(move) {
+        var next;
+        next = freeStates.pop();
+        next.parent = this;
+        next.lastMove = move;
+        next.depth = this.depth + 1;
+        next.flip = this.move('flip', this.flip, move);
+        next.twist = this.move('twist', this.twist, move);
+        next.slice = this.move('FRtoBR', this.slice * 24, move) / 24 | 0;
+        return next;
+      }
+
+      //# Phase 2
+
+      // Return the next valid phase 2 moves for this state
+      moves2() {
+        if (this.lastMove !== null) {
+          return nextMoves2[this.lastMove / 3 | 0];
+        } else {
+          return allMoves2;
+        }
+      }
+
+      // Compute the minimum number of moves to the solved cube
+      minDist2() {
+        var d1, d2, index1, index2;
+        index1 = (N_SLICE2 * this.URtoDF + this.FRtoBR) * N_PARITY + this.parity;
+        d1 = this.pruning('sliceURtoDFParity', index1);
+        index2 = (N_SLICE2 * this.URFtoDLF + this.FRtoBR) * N_PARITY + this.parity;
+        d2 = this.pruning('sliceURFtoDLFParity', index2);
+        return max(d1, d2);
+      }
+
+      // Initialize phase 2 coordinates
+      init2(top = true) {
+        if (this.parent === null) {
+          return;
+        }
+        // For other states, the phase 2 state is computed based on
+        // parent's state.
+        // Already assigned for the initial state
+        this.parent.init2(false);
+        this.URFtoDLF = this.move('URFtoDLF', this.parent.URFtoDLF, this.lastMove);
+        this.FRtoBR = this.move('FRtoBR', this.parent.FRtoBR, this.lastMove);
+        this.parity = this.move('parity', this.parent.parity, this.lastMove);
+        this.URtoUL = this.move('URtoUL', this.parent.URtoUL, this.lastMove);
+        this.UBtoDF = this.move('UBtoDF', this.parent.UBtoDF, this.lastMove);
+        if (top) {
+          // This is the initial phase 2 state. Get the URtoDF coordinate
+          // by merging URtoUL and UBtoDF
+          return this.URtoDF = this.move('mergeURtoDF', this.URtoUL, this.UBtoDF);
+        }
+      }
+
+      // Compute the next phase 2 state for the given move
+      next2(move) {
+        var next;
+        next = freeStates.pop();
+        next.parent = this;
+        next.lastMove = move;
+        next.depth = this.depth + 1;
+        next.URFtoDLF = this.move('URFtoDLF', this.URFtoDLF, move);
+        next.FRtoBR = this.move('FRtoBR', this.FRtoBR, move);
+        next.parity = this.move('parity', this.parity, move);
+        next.URtoDF = this.move('URtoDF', this.URtoDF, move);
+        return next;
+      }
+
+    };
+    solution = null;
+    phase1search = function(state) {
+      var depth, m, ref, results;
+      depth = 0;
+      results = [];
+      for (depth = m = 1, ref = maxDepth; (1 <= ref ? m <= ref : m >= ref); depth = 1 <= ref ? ++m : --m) {
+        phase1(state, depth);
+        if (solution !== null) {
+          break;
+        }
+        results.push(depth++);
+      }
+      return results;
+    };
+    phase1 = function(state, depth) {
+      var len, m, move, next, ref, ref1, results;
+      if (depth === 0) {
+        if (state.minDist1() === 0) {
+          // Make sure we don't start phase 2 with a phase 2 move as the
+          // last move in phase 1, because phase 2 would then repeat the
+          // same move.
+          if (state.lastMove === null || (ref = state.lastMove, indexOf.call(allMoves2, ref) < 0)) {
+            return phase2search(state);
+          }
+        }
+      } else if (depth > 0) {
+        if (state.minDist1() <= depth) {
+          ref1 = state.moves1();
+          results = [];
+          for (m = 0, len = ref1.length; m < len; m++) {
+            move = ref1[m];
+            next = state.next1(move);
+            phase1(next, depth - 1);
+            freeStates.push(next);
+            if (solution !== null) {
+              break;
+            } else {
+              results.push(void 0);
+            }
+          }
+          return results;
+        }
+      }
+    };
+    phase2search = function(state) {
+      var depth, m, ref, results;
+      // Initialize phase 2 coordinates
+      state.init2();
+      results = [];
+      for (depth = m = 1, ref = maxDepth - state.depth; (1 <= ref ? m <= ref : m >= ref); depth = 1 <= ref ? ++m : --m) {
+        phase2(state, depth);
+        if (solution !== null) {
+          break;
+        }
+        results.push(depth++);
+      }
+      return results;
+    };
+    phase2 = function(state, depth) {
+      var len, m, move, next, ref, results;
+      if (depth === 0) {
+        if (state.minDist2() === 0) {
+          return solution = state.solution();
+        }
+      } else if (depth > 0) {
+        if (state.minDist2() <= depth) {
+          ref = state.moves2();
+          results = [];
+          for (m = 0, len = ref.length; m < len; m++) {
+            move = ref[m];
+            next = state.next2(move);
+            phase2(next, depth - 1);
+            freeStates.push(next);
+            if (solution !== null) {
+              break;
+            } else {
+              results.push(void 0);
+            }
+          }
+          return results;
+        }
+      }
+    };
+    freeStates = (function() {
+      var m, ref, results;
+      results = [];
+      for (x = m = 0, ref = maxDepth + 1; (0 <= ref ? m <= ref : m >= ref); x = 0 <= ref ? ++m : --m) {
+        results.push(new State);
+      }
+      return results;
+    })();
+    state = freeStates.pop().init(this);
+    phase1search(state);
+    freeStates.push(state);
+    // Trim the trailing space
+    if (solution.length > 0) {
+      solution = solution.substring(0, solution.length - 1);
+    }
+    return solution;
+  };
+
+  faceNums = {
+    U: 0,
+    R: 1,
+    F: 2,
+    D: 3,
+    L: 4,
+    B: 5
+  };
+
+  faceNames = {
+    0: 'U',
+    1: 'R',
+    2: 'F',
+    3: 'D',
+    4: 'L',
+    5: 'B'
+  };
+
+  Cube.prototype.solve = function(maxDepth = 22) {
+    var clone, len, m, move, ref, rotation, solution, upright, uprightSolution;
+    clone = this.clone();
+    upright = clone.upright();
+    clone.move(upright);
+    rotation = new Cube().move(upright).center;
+    uprightSolution = clone.solveUpright(maxDepth);
+    solution = [];
+    ref = uprightSolution.split(' ');
+    for (m = 0, len = ref.length; m < len; m++) {
+      move = ref[m];
+      solution.push(faceNames[rotation[faceNums[move[0]]]]);
+      if (move.length > 1) {
+        solution[solution.length - 1] += move[1];
+      }
+    }
+    return solution.join(' ');
+  };
+
+  Cube.scramble = function() {
+    return Cube.inverse(Cube.random().solve());
+  };
+
+}).call(this);
+
+</script>
+<script>
+(() => {
+const $=s=>document.querySelector(s);
+const FACE={U:[0,1,0],D:[0,-1,0],R:[1,0,0],L:[-1,0,0],F:[0,0,1],B:[0,0,-1]};
+const DEF_COL={U:'#FFD500',D:'#F4F6F8',F:'#009E60',B:'#0051BA',R:'#FF5800',L:'#C41E3A'};
+const DEF_NAME={U:'เหลือง',D:'ขาว',F:'เขียว',B:'น้ำเงิน',R:'ส้ม',L:'แดง'};
+const COL={...DEF_COL,X:'repeating-linear-gradient(45deg,#7d8796 0 5px,#8f99a8 5px 10px)'};
+const NAME={...DEF_NAME},N=NAME;
+const POS={U:'ด้านบน',D:'ด้านล่าง',F:'ด้านหน้า',B:'ด้านหลัง',R:'ด้านขวา',L:'ด้านซ้าย'};
+try{const sv=JSON.parse(localStorage.getItem('rubik-colors')||'null');if(sv){Object.assign(COL,sv.col||{});Object.assign(NAME,sv.name||{});}}catch(e){}
+const saveColors=()=>{const col={};for(const f in DEF_COL)col[f]=COL[f];try{localStorage.setItem('rubik-colors',JSON.stringify({col,name:NAME}));}catch(e){}};
+const MOVES={R:[0,1,-1],L:[0,-1,1],U:[1,1,-1],D:[1,-1,1],F:[2,1,-1],B:[2,-1,1]};
+const DIRS=[[[1,0,0],'rotateY(90deg)'],[[-1,0,0],'rotateY(-90deg)'],[[0,1,0],'rotateX(90deg)'],[[0,-1,0],'rotateX(-90deg)'],[[0,0,1],''],[[0,0,-1],'rotateY(180deg)']];
+const key=v=>v.join(',');
+const stage=$('#stage'),cubeEl=$('#cube');
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const ICON={
+  restart:'<svg class="i" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.5-5.8"/><path d="M4 4v4h4"/></svg>',
+  back:'<svg class="i" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>',
+  next:'<svg class="i" viewBox="0 0 24 24"><path d="M7 6l7 6-7 6"/><path d="M18 6v12"/></svg>',
+  play:'<svg class="i" viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z" fill="currentColor"/></svg>',
+  pause:'<svg class="i" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14" stroke-width="3.2"/></svg>'
+};
+let S=46,vx=-28,vy=-38,cubies=[];
+
+function rot(v,ax,d){const[x,y,z]=v;
+  if(ax===0)return d<0?[x,z,-y]:[x,-z,y];
+  if(ax===1)return d<0?[-z,y,x]:[z,y,-x];
+  return d<0?[y,-x,z]:[-y,x,z];}
+function parse(t){let[ax,l,d]=MOVES[t[0]];const m=t.slice(1);let n=1;if(m.includes('2'))n=2;else if(m==="'")d=-d;return{ax,l,d,n};}
+const split=s=>s.trim().split(/\s+/).filter(Boolean);
+const inv=t=>t.endsWith('2')?t:t.endsWith("'")?t[0]:t+"'";
+const invert=a=>a.slice().reverse().map(inv);
+const FN={R:'ด้านขวา',L:'ด้านซ้าย',U:'ด้านบน',D:'ด้านล่าง',F:'ด้านหน้า',B:'ด้านหลัง'};
+const describe=t=>{const m=t.slice(1);return`หมุน${FN[t[0]]} ${m==="'"?'ทวนเข็มนาฬิกา ↺':m.includes('2')?'2 ครั้ง (ครึ่งรอบ)':'ตามเข็มนาฬิกา ↻'}`;};
+
+function build(){
+  cubeEl.textContent='';cubies=[];
+  for(let x=-1;x<=1;x++)for(let y=-1;y<=1;y++)for(let z=-1;z<=1;z++){
+    if(!x&&!y&&!z)continue;
+    const st={};
+    for(const f in FACE){const n=FACE[f];if((n[0]&&n[0]===x)||(n[1]&&n[1]===y)||(n[2]&&n[2]===z))st[key(n)]=f;}
+    const el=document.createElement('div');el.className='cubie';
+    const faces=DIRS.map(([n,r])=>{const f=document.createElement('div');f.className='face';f.dataset.r=r;f.appendChild(document.createElement('i'));el.appendChild(f);return[f,n];});
+    cubeEl.appendChild(el);cubies.push({p:[x,y,z],st,el,faces});
+  }
+  layout();
+}
+const baseT=(c,a=[0,0,0])=>`rotateX(${a[0]}deg) rotateY(${a[1]}deg) rotateZ(${a[2]}deg) translate3d(${c.p[0]*S}px,${-c.p[1]*S}px,${c.p[2]*S}px)`;
+function paint(c){
+  const center=Math.abs(c.p[0])+Math.abs(c.p[1])+Math.abs(c.p[2])===1;
+  for(const[f,n]of c.faces){const i=f.firstChild,col=c.st[key(n)];
+    if(col){i.style.display='';i.style.background=COL[col];i.textContent=center&&col!=='X'?col:'';}else i.style.display='none';}
+}
+function renderC(c){c.el.style.transition='none';c.el.style.transform=baseT(c);paint(c);}
+function layout(){
+  S=Math.max(30,Math.floor(Math.min(stage.clientWidth,stage.clientHeight)/5.6));
+  for(const c of cubies){
+    for(const[f]of c.faces){f.style.width=f.style.height=S+'px';f.style.left=f.style.top=(-S/2)+'px';f.style.fontSize=(S*.34)+'px';f.style.transform=`${f.dataset.r} translateZ(${S/2}px)`;}
+    renderC(c);
+  }
+}
+const setView=()=>{cubeEl.style.transform=`rotateX(${vx}deg) rotateY(${vy}deg)`;};
+function applyModel(t){const{ax,l,d,n}=parse(t);
+  for(const c of cubies){if(c.p[ax]!==l)continue;
+    for(let k=0;k<n;k++){c.p=rot(c.p,ax,d);const s={};for(const q in c.st)s[key(rot(q.split(',').map(Number),ax,d))]=c.st[q];c.st=s;}}
+}
+function isSolved(){const m={};for(const c of cubies)for(const k in c.st){if(m[k]===undefined)m[k]=c.st[k];else if(m[k]!==c.st[k])return false;}return true;}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function animate(t,dur){
+  const{ax,l,d,n}=parse(t);const th=d*90*n;const a=[0,0,0];a[ax]=ax===1?th:-th;
+  const aff=cubies.filter(c=>c.p[ax]===l);
+  if(reduce||dur<=0){applyModel(t);aff.forEach(renderC);return sleep(reduce?Math.min(dur,120):0);}
+  aff.forEach(c=>{c.el.style.transition=`transform ${dur}ms cubic-bezier(.45,0,.2,1)`;c.el.style.transform=baseT(c,a);});
+  return sleep(dur+25).then(()=>{applyModel(t);aff.forEach(renderC);void cubeEl.offsetWidth;});
+}
+
+// ---------- queue ----------
+let queue=[],busy=false,idleWaiters=[];
+function enqueue(job){queue.push(job);if(!busy)runQueue();}
+async function runQueue(){busy=true;renderPlayer();
+  while(queue.length){const j=queue.shift();j.before&&j.before();await animate(j.tok,j.dur);j.after&&j.after();}
+  busy=false;idleWaiters.splice(0).forEach(r=>r());renderPlayer();}
+const idle=()=>busy?new Promise(r=>idleWaiters.push(r)):Promise.resolve();
+const stopAll=()=>{queue=[];};
+
+// ---------- state ----------
+let mode='intro',demo=null,history=[],scrambleSeq=[],armed=false,t0=0,elapsed=null,running=false,autoTimer=null;
+const toTop=()=>{if(innerWidth<980)scrollTo({top:0,behavior:reduce?'auto':'smooth'});};
+
+async function loadDemo(title,alg,setup,autoplay,kind){
+  stopAll();clearTimeout(autoTimer);await idle();build();
+  const moves=split(alg);
+  if(setup&&setup.length===54)strToModel(setup);
+  else{(setup==='none'?[]:invert(moves)).forEach(applyModel);cubies.forEach(renderC);}
+  mode='demo';demo={title,alg,setup,moves,i:0,now:null,kind:kind||'lesson'};renderPlayer();
+  if(autoplay)autoTimer=setTimeout(()=>playDemo(true),reduce?100:600);
+}
+function playDemo(all){
+  if(!demo||busy)return;
+  const d=demo,end=all?d.moves.length:Math.min(d.i+1,d.moves.length);
+  const dur=d.moves.length===1?650:d.kind==='solution'?520:430;
+  for(let k=d.i;k<end;k++)enqueue({tok:d.moves[k],dur,before:()=>{d.now=k;renderPlayer();},after:()=>{d.i=k+1;d.now=null;renderPlayer();}});
+}
+function stepBack(){
+  if(!demo||busy||demo.i===0)return;const d=demo,k=d.i-1;
+  enqueue({tok:inv(d.moves[k]),dur:380,before:()=>{d.now=k;renderPlayer();},after:()=>{d.i=k;d.now=null;renderPlayer();}});
+}
+const fmt=ms=>(ms/1000).toFixed(1);
+
+function renderPlayer(){
+  const big=$('#mvBig'),tt=$('#mvTitle'),ds=$('#mvDesc'),chips=$('#chips'),ctr=$('#ctrls'),fill=$('#trackFill'),track=$('#track');
+  big.className='';ds.className='';chips.textContent='';ctr.textContent='';ctr.hidden=true;track.hidden=true;chips.hidden=true;
+  const chip=(t,c)=>{const s=document.createElement('span');s.className='chip '+(c||'');s.textContent=t;chips.appendChild(s);return s;};
+  const cbtn=(html,label,fn,primary,dis)=>{const b=document.createElement('button');b.type='button';b.className='cbtn'+(primary?' primary':'');b.innerHTML=html;b.setAttribute('aria-label',label);b.disabled=!!dis;b.onclick=fn;ctr.appendChild(b);};
+  if(mode==='demo'&&demo&&demo.live){
+    const d=demo,n=d.moves.length,done=d.i>=n;
+    tt.textContent=d.title;
+    if(done){big.textContent='✓';big.className='ok';ds.textContent='เรียงเสร็จแล้ว เก่งมาก!';ds.className='ok';}
+    else{big.textContent=d.moves[d.i];big.className=d.off?'warn':'now';
+      ds.textContent=d.off?'ลูกไม่ตรงกับท่าที่บอก ลองหมุนกลับ หรือกดคำนวณใหม่':d.half?`หมุน ${d.moves[d.i][0]} ต่ออีก 1 ครั้ง`:`หมุนลูกจริง: ${describe(d.moves[d.i])} (${d.i+1}/${n})`;}
+    track.hidden=false;fill.style.width=(d.i/n*100)+'%';
+    chips.hidden=false;let el=null;d.moves.forEach((t,k)=>{const e=chip(t,k<d.i?'done':k===d.i?'next':'');if(k===d.i)el=e;});
+    if(el)requestAnimationFrame(()=>{chips.scrollLeft=el.offsetLeft-chips.clientWidth/2+el.offsetWidth/2;});
+    ctr.hidden=false;ctr.style.gridTemplateColumns='1fr 1fr';
+    if(d.kind==='solution')cbtn(ICON.restart+'คำนวณใหม่','คำนวณวิธีแก้ใหม่จากลูกตอนนี้',btSolve,!done&&d.off);
+    else cbtn(ICON.restart+'สุ่มใหม่','สุ่มโจทย์ใหม่',btScramble,false);
+    cbtn('เลิก','เลิกทำตาม',()=>goLive(curTab==='practice'?'practice':'live'),false);
+    return;
+  }
+  ctr.style.gridTemplateColumns='';
+  if(mode==='live'){
+    tt.textContent='ลูกจริง (บลูทูธ)';const last=bt.moves[bt.moves.length-1];
+    big.textContent=last||'BT';if(!last)big.className='long';
+    if(bt.facelet===SOLVED){ds.textContent='ลูกเรียงครบทุกด้าน';ds.className='ok';}else ds.textContent='หมุนลูกจริง แล้วลูกในจอจะหมุนตาม';
+    if(bt.moves.length){chips.hidden=false;bt.moves.slice(-30).forEach(t=>chip(t));requestAnimationFrame(()=>{chips.scrollLeft=chips.scrollWidth;});}
+    return;
+  }
+  if(mode==='demo'&&demo){
+    const d=demo,n=d.moves.length,done=d.i>=n&&!busy,cur=d.now!=null?d.now:d.i;
+    tt.textContent=d.title;
+    if(done){big.textContent='✓';big.className='ok';ds.textContent=d.kind==='solution'?'เรียงเสร็จแล้ว เก่งมาก!':'จบท่าแล้ว';ds.className='ok';}
+    else{big.textContent=d.moves[cur];if(d.now!=null)big.className='now';ds.textContent=(d.now!=null?'':'ท่าต่อไป: ')+describe(d.moves[cur])+`  (${cur+1}/${n})`;}
+    track.hidden=false;fill.style.width=(d.i/n*100)+'%';
+    if(n>1){chips.hidden=false;let el=null;
+      d.moves.forEach((t,k)=>{const e=chip(t,k===d.now?'now':k<d.i?'done':(k===d.i&&!busy)?'next':'');if(k===cur)el=e;});
+      if(el)requestAnimationFrame(()=>{chips.scrollLeft=el.offsetLeft-chips.clientWidth/2+el.offsetWidth/2;});}
+    ctr.hidden=false;
+    cbtn(ICON.restart,'เริ่มใหม่',()=>loadDemo(d.title,d.alg,d.setup,false,d.kind),false,busy);
+    cbtn(ICON.back,'ย้อน 1 ท่า',stepBack,false,busy||d.i===0);
+    if(busy)cbtn(ICON.pause+'หยุด','หยุด',stopAll,true);
+    else if(done)cbtn(ICON.restart+'ดูอีกครั้ง','ดูอีกครั้ง',()=>loadDemo(d.title,d.alg,d.setup,true,d.kind),true);
+    else cbtn(ICON.play+'เล่นทั้งหมด','เล่นทั้งหมด',()=>playDemo(true),true);
+    cbtn(ICON.next,'ทีละท่า',()=>playDemo(false),false,busy||done);
+  }else if(mode==='practice'){
+    tt.textContent='ฝึกหมุนเอง';big.className='long';
+    const solvedNow=isSolved()&&history.length>0;
+    big.textContent=running?fmt(performance.now()-t0):elapsed!=null?fmt(elapsed):'0.0';
+    if(solvedNow){big.className='long ok';ds.textContent=`เรียงครบทุกด้าน! ${history.length} ท่า`+(elapsed!=null?` ใน ${fmt(elapsed)} วินาที`:'');ds.className='ok';}
+    else ds.textContent=running?`กำลังจับเวลา หมุนไปแล้ว ${history.length} ท่า`:armed?'หมุนท่าแรกเพื่อเริ่มจับเวลา':bt.on?'กด “สุ่มโจทย์ให้ทำตาม” หรือหมุนลูกจริงได้เลย':scrambleSeq.length?'หมุนท่าแรกเพื่อเริ่มจับเวลา':'กด “สุ่มโจทย์ใหม่” เพื่อเริ่ม';
+    if(history.length){chips.hidden=false;history.slice(-30).forEach(t=>chip(t));requestAnimationFrame(()=>{chips.scrollLeft=chips.scrollWidth;});}
+  }else if(mode==='edit'){
+    const n=entry.filter((x,i)=>x!=='X'&&i%9!==4).length;
+    tt.textContent='กรอกสีจากลูกจริง';big.className='long';big.textContent=`${Math.round(n/48*100)}%`;
+    ds.textContent=n<48?`กรอกแล้ว ${n} จาก 48 ช่อง`:'ครบแล้ว กด “หาวิธีแก้” ได้เลย';
+    track.hidden=false;fill.style.width=(n/48*100)+'%';
+  }else{
+    tt.textContent='ลูกบาศก์จำลอง';big.className='long';big.textContent='3×3';
+    ds.textContent='กด “ดูตัวอย่าง” ในบทเรียน แล้วลูกนี้จะหมุนให้ดู';
+  }
+}
+setInterval(()=>{if(running&&mode==='practice')renderPlayer();},100);
+
+// ---------- lessons ----------
+const Y='#FFD500',YI='#18213A';
+const STEPS=[
+ {n:'เริ่ม',t:'อ่านสัญลักษณ์ก่อน',goal:'ชื่อท่าหมุนที่ใช้ในทุกสูตร',sc:'var(--accent)',sci:'var(--accent-ink)',nota:true,
+  tip:'ถือรูบิคให้สีเหลืองอยู่บน สีขาวอยู่ล่างตลอดทุกขั้น ในแอปนี้ด้านหน้าเป็นสีเขียว'},
+ {n:'1',t:'กากบาทสีขาว',goal:'ขอบขาว 4 ชิ้นเป็นกากบาทด้านล่าง สีข้างตรงกับจุดกลาง',sc:'#F4F6F8',sci:YI,
+  how:['ทำ “ดอกเดซี่” พาขอบขาว 4 ชิ้นขึ้นไปล้อมจุดกลางสีเหลือง ขั้นนี้ลองหมุนเอง ไม่ต้องจำสูตร','หมุน U จนสีข้างของขอบขาวชิ้นหนึ่งตรงกับจุดกลางด้านนั้น','หมุนด้านนั้น 2 ครั้ง ขอบขาวจะลงไปอยู่ด้านล่าง ทำซ้ำให้ครบ 4 ชิ้น'],
+  algs:[['F2','พาขอบขาวลงล่าง','F2']],tip:'ถ้าช่องที่จะใส่มีขอบขาวอยู่แล้ว ให้หมุน U หลบก่อน'},
+ {n:'2',t:'มุมสีขาว',goal:'ใส่มุมขาว 4 มุม ให้ชั้นล่างเสร็จ',sc:'#F4F6F8',sci:YI,
+  how:['หามุมที่มีสีขาวในชั้นบน','หมุน U จนมุมอยู่เหนือช่องของมัน (ระหว่างจุดกลาง 2 สีของมุมนั้น)','หันมุมไว้ หน้า-ขวา-บน แล้วทำสูตรซ้ำจนมุมลงถูกที่ (1, 3 หรือ 5 รอบ)'],
+  algs:[["R U R' U'",'ทำซ้ำจนมุมลงถูกที่',"R U R' U' R U R' U' R U R' U'"]],tip:'มุมขาวติดชั้นล่างแต่ผิดที่: หันไว้ หน้า-ขวา-ล่าง แล้วทำสูตร 1 รอบเพื่อดึงขึ้นมาก่อน'},
+ {n:'3',t:'ชั้นกลาง',goal:'ใส่ขอบ 4 ชิ้นของชั้นกลาง',sc:'#009E60',sci:'#FFFFFF',
+  how:['หาขอบในชั้นบนที่ไม่มีสีเหลือง','หมุน U จนสีหน้าของขอบตรงกับจุดกลางด้านหน้า (เห็นเป็นตัว T กลับหัว)','สีบนของขอบตรงกับด้านขวา ใช้สูตรไปขวา ตรงกับด้านซ้าย ใช้สูตรไปซ้าย'],
+  algs:[["U R U' R' U' F' U F",'ใส่ขอบไปทางขวา',"U R U' R' U' F' U F"],["U' L' U L U F U' F'",'ใส่ขอบไปทางซ้าย',"U' L' U L U F U' F'"]],tip:'ขอบติดชั้นกลางแต่กลับด้าน: ทำสูตรไปขวาตรงนั้น 1 ครั้งเพื่อดึงออกมาก่อน'},
+ {n:'4',t:'กากบาทสีเหลือง',goal:'ทำกากบาทเหลืองด้านบน ยังไม่ต้องสนใจมุม',sc:Y,sci:YI,
+  how:['เห็นแค่จุดตรงกลาง: ทำสูตร 1 ครั้ง จะได้ตัว L','เห็นตัว L: หันแขนตัว L ไปทางหลังกับทางซ้าย (เหมือนเข็มนาฬิกาตอน 9 โมง) แล้วทำสูตร','เห็นเส้นตรง: หันให้เส้นนอนซ้าย-ขวา แล้วทำสูตร จะได้กากบาท'],
+  algs:[["F R U R' U' F'",'ใช้ได้ทั้ง 3 แบบ',"F R U R' U' F'"]]},
+ {n:'5',t:'ขอบเหลืองให้ตรงสี',goal:'สีข้างของขอบเหลืองตรงกับจุดกลางครบ 4 ด้าน',sc:Y,sci:YI,
+  how:['หมุน U จนมีขอบที่ตรงสีอย่างน้อย 2 ชิ้น','2 ชิ้นอยู่ติดกัน: หันให้อยู่ด้านหลังกับด้านขวา แล้วทำสูตร','2 ชิ้นอยู่ตรงข้ามกัน: ทำสูตร 1 ครั้งก่อน จะกลายเป็นแบบติดกัน'],
+  algs:[["R U R' U R U2 R' U",'สลับขอบหน้ากับขอบซ้าย',"R U R' U R U2 R' U"]]},
+ {n:'6',t:'วางมุมเหลือง',goal:'มุมเหลืองทุกมุมอยู่ถูกที่ หันผิดทางได้',sc:Y,sci:YI,
+  how:['หามุมที่ 3 สีตรงกับจุดกลาง 3 ด้านรอบมัน','หันมุมนั้นไว้ หน้า-ขวา-บน แล้วทำสูตร 1–2 ครั้ง','ไม่เจอเลยสักมุม: ทำสูตร 1 ครั้งจากมุมไหนก็ได้ แล้วจะเจอ'],
+  algs:[["U R U' L' U R' U' L",'มุมหน้า-ขวา-บนอยู่กับที่ อีก 3 มุมวนกัน',"U R U' L' U R' U' L"]]},
+ {n:'7',t:'หมุนมุมเหลือง',goal:'ขั้นสุดท้าย หมุนมุมให้เหลืองหันขึ้นทั้งหมด',sc:Y,sci:YI,
+  how:['หันมุมที่ยังไม่เสร็จไว้ หน้า-ขวา-บน','ทำสูตรซ้ำจนเหลืองของมุมนั้นหันขึ้น (2 หรือ 4 ครั้ง)','หมุนแค่ U พามุมถัดไปมาไว้ที่เดิม แล้วทำซ้ำ ห้ามหมุนทั้งลูก','ครบทุกมุมแล้ว หมุน U ให้ตรงสี เสร็จ!'],
+  algs:[["R' D' R D",'ทำซ้ำทีละมุม',"R' D' R D R' D' R D U R' D' R D R' D' R D R' D' R D R' D' R D U'"]],tip:'ระหว่างทำ ชั้นล่างจะดูเละ ไม่ต้องตกใจ ทำต่อให้ครบแล้วจะกลับมาเอง'},
+];
+let prog={};try{prog=JSON.parse(localStorage.getItem('rubik-progress')||'{}')||{};}catch(e){}
+let curStep=0;try{curStep=Math.min(7,Math.max(0,+localStorage.getItem('rubik-step')||0));}catch(e){}
+const saveProg=()=>{try{localStorage.setItem('rubik-progress',JSON.stringify(prog));localStorage.setItem('rubik-step',curStep);}catch(e){}};
+function el(tag,cls,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e;}
+function goStep(i){curStep=i;saveProg();renderLesson();if(innerWidth<980){const r=$('#stepper').getBoundingClientRect();if(r.top<0||r.top>innerHeight*.6)$('#stepper').scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});}}
+function renderLesson(){
+  const sp=$('#stepper');sp.textContent='';
+  STEPS.forEach((s,i)=>{const b=el('button','pill'+(prog[i]?' done':''),prog[i]&&i!==curStep?'✓':s.n);b.type='button';b.setAttribute('aria-label',`ขั้น ${s.n} ${s.t}`);if(i===curStep)b.setAttribute('aria-current','step');b.onclick=()=>goStep(i);sp.appendChild(b);});
+  const cur=sp.children[curStep];requestAnimationFrame(()=>{sp.scrollLeft=cur.offsetLeft-sp.clientWidth/2+cur.offsetWidth/2;});
+  const s=STEPS[curStep],L=$('#lesson');L.textContent='';
+  const head=el('div','lhead');const bd=el('span','badge',s.n==='เริ่ม'?'?':s.n);bd.style.setProperty('--sc',s.sc);bd.style.setProperty('--sci',s.sci);
+  const ht=el('div');ht.append(el('h2','',s.t),el('p','',s.goal));head.append(bd,ht);L.appendChild(head);
+  if(s.nota){
+    const r=el('div','rules');
+    [['R','หมุนด้านขวา'],['L','หมุนด้านซ้าย'],['U','หมุนด้านบน'],['D','หมุนด้านล่าง'],['F','หมุนด้านหน้า'],['B','หมุนด้านหลัง'],['R','ตัวอักษรเฉย ๆ คือหมุนตามเข็มนาฬิกา ↻ เมื่อมองตรงไปที่ด้านนั้น'],["R'",'มีขีด (อ่านว่า “ไพรม์”) คือหมุนทวนเข็มนาฬิกา ↺'],['R2','มีเลข 2 คือหมุน 2 ครั้ง']].forEach(([a,b],k)=>{if(k===6)r.appendChild(el('div','',''))&&r.appendChild(el('div','',''));r.append(el('b','',a),el('span','',b));});
+    L.appendChild(r);
+    L.appendChild(el('p','muted small','แตะเพื่อดูแต่ละท่าบนลูกบาศก์ด้านบน'));
+    const g=el('div','nota');["R","R'","L","L'","U","U'","D","D'","F","F'","B","B'"].forEach(t=>{const b=el('button','',t);b.type='button';b.onclick=()=>{toTop();loadDemo(`ท่า ${t}`,t,'none',true);};g.appendChild(b);});
+    L.appendChild(g);
+  }else{
+    const ol=el('ol','how');s.how.forEach(h=>ol.appendChild(el('li','',h)));L.appendChild(ol);
+    s.algs.forEach(([a,cap,demoAlg])=>{const box=el('div','algbox');const d=el('div');const c=el('code');c.textContent=a;d.append(c,el('small','',cap));
+      const b=el('button','btn primary',ICON.play+'ดู');b.type='button';b.setAttribute('aria-label',`ดูตัวอย่างสูตร ${a}`);
+      b.onclick=()=>{toTop();loadDemo(`ขั้น ${s.n}: ${s.t}`,demoAlg,undefined,true);};box.append(d,b);L.appendChild(box);});
+  }
+  if(s.tip)L.appendChild(el('p','tip','💡 '+s.tip));
+  const ft=el('div','lfoot');
+  const prev=el('button','btn','ก่อนหน้า');prev.disabled=curStep===0;prev.onclick=()=>goStep(curStep-1);
+  const dn=el('button','btn done-btn',prog[curStep]?'✓ ทำได้แล้ว':'ทำได้แล้ว');dn.setAttribute('aria-pressed',!!prog[curStep]);
+  dn.onclick=()=>{prog[curStep]=!prog[curStep];saveProg();renderLesson();};
+  if(curStep===0){dn.style.visibility='hidden';}
+  const nx=el('button','btn primary',curStep===7?'ไปฝึก':'ถัดไป');nx.onclick=()=>curStep===7?selectTab('practice'):goStep(curStep+1);
+  ft.append(prev,dn,nx);L.appendChild(ft);
+}
+
+// ---------- practice ----------
+function userMove(t){
+  if(mode!=='practice')enterPractice();
+  enqueue({tok:t,dur:170,before:()=>{if(armed&&!running){running=true;t0=performance.now();elapsed=null;}},after:()=>{history.push(t);
+    if(running&&isSolved()){running=false;armed=false;elapsed=performance.now()-t0;}renderPlayer();}});
+}
+function enterPractice(){if(mode!=='practice'){history=[];scrambleSeq=[];running=false;elapsed=null;armed=false;stopAll();}clearTimeout(autoTimer);mode='practice';demo=null;renderPlayer();}
+function genScramble(len){
+  const faces='RLUDFB',axis={R:0,L:0,U:1,D:1,F:2,B:2},mods=['',"'",'2'],seq=[];
+  while(seq.length<len){const f=faces[Math.random()*6|0],p1=seq.length?seq[seq.length-1][0]:null,p2=seq.length>1?seq[seq.length-2][0]:null;
+    if(f===p1)continue;if(p1&&p2&&axis[f]===axis[p1]&&axis[f]===axis[p2])continue;seq.push(f+mods[Math.random()*3|0]);}
+  return seq;}
+async function scramble(){
+  stopAll();await idle();build();mode='practice';demo=null;history=[];running=false;elapsed=null;armed=false;
+  const seq=genScramble(20);
+  scrambleSeq=seq;toTop();
+  seq.forEach((t,k)=>enqueue({tok:t,dur:60,after:k===seq.length-1?()=>{armed=true;renderPlayer();}:null}));
+}
+$('#scramble').onclick=scramble;
+$('#reset').onclick=async()=>{stopAll();await idle();build();mode='practice';demo=null;history=[];scrambleSeq=[];running=false;elapsed=null;armed=false;renderPlayer();};
+$('#undo').onclick=()=>{if(busy||mode!=='practice'||!history.length)return;const t=history.pop();enqueue({tok:inv(t),dur:170,after:renderPlayer});};
+$('#unscramble').onclick=async()=>{
+  if(mode!=='practice')return;stopAll();await idle();
+  const seq=invert(scrambleSeq.concat(history));if(!seq.length)return;
+  running=false;armed=false;elapsed=null;toTop();
+  seq.forEach((t,k)=>enqueue({tok:t,dur:220,after:()=>{if(k===seq.length-1){history=[];scrambleSeq=[];}renderPlayer();}}));
+};
+function renderPad(){const pad=$('#pad');pad.textContent='';
+  ['R','L','U','D','F','B',"R'","L'","U'","D'","F'","B'",'R2','L2','U2','D2','F2','B2'].forEach(t=>{const b=el('button','',t);b.type='button';b.style.setProperty('--dot',COL[t[0]]);b.setAttribute('aria-label',describe(t));b.onclick=()=>userMove(t);pad.appendChild(b);});}
+
+// ---------- solve from a real cube ----------
+const ORDER='URFDLB';
+const WIZ=[
+ ['F','ด้านหน้า',()=>`ถือให้สี${N.U}อยู่บน แล้วหันด้านที่กลางเป็นสี${N.F}เข้าหาตัว`,()=>`ฝั่งสี${N.U}`,()=>'',[-18,0]],
+ ['R','ด้านขวา',()=>`จากด้านสี${N.F} หมุนทั้งลูกไปทางซ้าย 1 ครั้ง (สี${N.U}ยังอยู่บน) จะเห็นกลางสี${N.R}`,()=>`ฝั่งสี${N.U}`,()=>'',[-18,-90]],
+ ['B','ด้านหลัง',()=>`หมุนทั้งลูกไปทางซ้ายอีก 1 ครั้ง จะเห็นกลางสี${N.B}`,()=>`ฝั่งสี${N.U}`,()=>'',[-18,180]],
+ ['L','ด้านซ้าย',()=>`หมุนทั้งลูกไปทางซ้ายอีก 1 ครั้ง จะเห็นกลางสี${N.L}`,()=>`ฝั่งสี${N.U}`,()=>'',[-18,90]],
+ ['U','ด้านบน',()=>`หันด้านสี${N.F}เข้าหาตัว แล้วพลิกให้ด้านสี${N.U}หันเข้าหาตัว ด้านสี${N.F}จะอยู่ล่าง`,()=>'',()=>`ฝั่งสี${N.F}`,[-72,0]],
+ ['D','ด้านล่าง',()=>`หันด้านสี${N.F}เข้าหาตัว แล้วพลิกให้ด้านสี${N.D}หันเข้าหาตัว ด้านสี${N.F}จะอยู่บน`,()=>`ฝั่งสี${N.F}`,()=>'',[72,0]],
+];
+const blankEntry=()=>{const a=[];for(const f of ORDER)for(let i=0;i<9;i++)a.push(i===4?f:'X');return a;};
+let entry=[];try{entry=(localStorage.getItem('rubik-entry')||'').split('');}catch(e){}
+if(entry.length!==54||!/^[URFDLBX]+$/.test(entry.join(''))||ORDER.split('').some((f,i)=>entry[i*9+4]!==f))entry=blankEntry();
+const saveEntry=()=>{try{localStorage.setItem('rubik-entry',entry.join(''));}catch(e){}};
+let curFace='F',curColor='U',solverReady=false,appSnap=null,samples={},overrides=new Set(),photo=null;
+function facePos(f,r,c){switch(f){
+  case'U':return[c-1,1,r-1];case'D':return[c-1,-1,1-r];case'F':return[c-1,1-r,1];
+  case'B':return[1-c,1-r,-1];case'R':return[1,1-r,1-c];default:return[-1,1-r,c-1];}}
+const at=p=>cubies.find(q=>q.p[0]===p[0]&&q.p[1]===p[1]&&q.p[2]===p[2]);
+function strToModel(s){build();ORDER.split('').forEach((f,fi)=>{for(let k=0;k<9;k++)at(facePos(f,k/3|0,k%3)).st[key(FACE[f])]=s[fi*9+k];});cubies.forEach(renderC);}
+function modelToStr(){let s='';for(const f of ORDER)for(let k=0;k<9;k++)s+=at(facePos(f,k/3|0,k%3)).st[key(FACE[f])];return s;}
+function faceView(){const w=WIZ.find(w=>w[0]===curFace);vx=w[5][0];vy=w[5][1];setView();}
+async function enterEdit(){stopAll();clearTimeout(autoTimer);await idle();if(mode!=='edit')appSnap=modelToStr();mode='edit';demo=null;strToModel(entry.join(''));faceView();renderEditor();renderPlayer();}
+const cellBg=v=>v==='X'?'#8f99a8':COL[v];
+function renderEditor(){
+  $('#solveHold').innerHTML=`ถือรูบิคให้ <b>สี${N.U}อยู่บน สี${N.F}อยู่หน้า</b> แล้วกรอกให้ครบ 6 ด้าน`;
+  const ft=$('#faceTabs');ft.textContent='';
+  for(const w of WIZ){const f=w[0],fi=ORDER.indexOf(f);const b=el('button','ftab');b.type='button';b.setAttribute('aria-pressed',f===curFace);
+    const mini=el('div','mini');let full=true;for(let k=0;k<9;k++){const c=el('b');const v=entry[fi*9+k];if(v==='X')full=false;c.style.background=cellBg(v);mini.appendChild(c);}
+    b.append(mini,w[1].replace('ด้าน',''));if(full)b.appendChild(el('span','ok','✓'));b.onclick=()=>{curFace=f;renderEditor();faceView();};ft.appendChild(b);}
+  const w=WIZ.find(w=>w[0]===curFace),fi=ORDER.indexOf(curFace);
+  $('#faceName').textContent=`${w[1]} (กลางสี${NAME[curFace]})`;$('#faceHow').textContent=w[2]();
+  $('#labTop').textContent=w[3]();$('#labBottom').textContent=w[4]();
+  $('#photoTop').textContent=' '+(w[3]()||`ฝั่งตรงข้ามกับสี${N.F}`);
+  const g=$('#grid9');g.textContent='';
+  for(let k=0;k<9;k++){const v=entry[fi*9+k];const b=el('button');b.type='button';
+    if(v==='X')b.className='unset';else b.style.background=COL[v];
+    b.setAttribute('aria-label',`ช่อง ${k+1}: ${v==='X'?'ยังไม่กรอก':'สี'+NAME[v]}`);
+    if(k===4){b.disabled=true;b.textContent=curFace;}else b.onclick=()=>paintCell(fi*9+k);
+    g.appendChild(b);}
+  const pal=$('#palette');pal.textContent='';
+  for(const f of 'UDFBRL'){const n=entry.filter(x=>x===f).length;const b=el('button','swatch');b.type='button';b.setAttribute('aria-pressed',f===curColor);
+    const i=el('i');i.style.background=COL[f];const c=el('span',n>9?'over':'',`${n}/9`);
+    b.append(i,el('span','',NAME[f]),c);b.onclick=()=>{curColor=f;renderEditor();};pal.appendChild(b);}
+  const i=WIZ.findIndex(w=>w[0]===curFace);$('#prevFace').disabled=i===0;$('#nextFace').disabled=i===5;
+  renderColorRows();renderPad();
+}
+async function paintCell(idx){
+  if(mode!=='edit')await enterEdit();
+  entry[idx]=entry[idx]===curColor?'X':curColor;overrides.add(idx);saveEntry();
+  const f=ORDER[idx/9|0],k=idx%9;const c=at(facePos(f,k/3|0,k%3));c.st[key(FACE[f])]=entry[idx];paint(c);
+  showMsg('');renderEditor();renderPlayer();
+}
+const moveFace=d=>{const i=WIZ.findIndex(w=>w[0]===curFace)+d;if(i<0||i>5)return;curFace=WIZ[i][0];renderEditor();faceView();};
+$('#nextFace').onclick=()=>moveFace(1);$('#prevFace').onclick=()=>moveFace(-1);
+$('#clearFace').onclick=async()=>{const fi=ORDER.indexOf(curFace);delete samples[curFace];for(let k=0;k<9;k++){overrides.delete(fi*9+k);if(k!==4)entry[fi*9+k]='X';}saveEntry();showMsg('');await enterEdit();};
+$('#clearAll').onclick=async()=>{entry=blankEntry();samples={};overrides.clear();saveEntry();showMsg('');curFace='F';await enterEdit();};
+$('#fromApp').onclick=async()=>{stopAll();await idle();entry=(mode==='edit'&&appSnap?appSnap:modelToStr()).split('');samples={};overrides.clear();saveEntry();showMsg('');await enterEdit();};
+
+const SETS=new Set();
+for(let x=-1;x<=1;x++)for(let y=-1;y<=1;y++)for(let z=-1;z<=1;z++){const l=[];for(const f in FACE){const n=FACE[f];if((n[0]&&n[0]===x)||(n[1]&&n[1]===y)||(n[2]&&n[2]===z))l.push(f);}if(l.length>1)SETS.add(l.sort().join(''));}
+const parity=p=>{let n=0;for(let i=0;i<p.length;i++)for(let j=i+1;j<p.length;j++)if(p[i]>p[j])n++;return n%2;};
+function validate(){
+  const s=entry.join(''),errs=[];
+  const unk=entry.filter(x=>x==='X').length;if(unk)errs.push(`ยังกรอกไม่ครบ เหลืออีก ${unk} ช่อง`);
+  for(const f of ORDER){const n=entry.filter(x=>x===f).length;if(n>9)errs.push(`สี${NAME[f]}มี ${n} ช่อง (ต้องมี 9)`);}
+  if(errs.length)return errs;
+  const pieces={};ORDER.split('').forEach((f,fi)=>{for(let k=0;k<9;k++){const pk=key(facePos(f,k/3|0,k%3));(pieces[pk]=pieces[pk]||[]).push(s[fi*9+k]);}});
+  const seen={};
+  for(const pk in pieces){const l=pieces[pk];if(l.length<2)continue;const id=l.slice().sort().join('');const kind=l.length===3?'มุม':'ขอบ';const nm=l.map(x=>NAME[x]).join('-');
+    if(!SETS.has(id))errs.push(`ชิ้น${kind}สี ${nm} ไม่มีอยู่ในรูบิคจริง`);else if(seen[id])errs.push(`ชิ้น${kind}สี ${nm} ซ้ำกัน 2 ชิ้น`);seen[id]=1;}
+  if(errs.length)return errs.slice(0,4);
+  const c=Cube.fromString(s);
+  if(c.co.reduce((a,b)=>a+b,0)%3)errs.push('มีมุม 1 ชิ้นถูกบิดผิดทาง ลองตรวจว่ากรอกสีของมุมสลับกันหรือเปล่า');
+  if(c.eo.reduce((a,b)=>a+b,0)%2)errs.push('มีขอบ 1 ชิ้นกลับด้าน ลองตรวจว่ากรอกสีของขอบสลับกันหรือเปล่า');
+  if(!errs.length&&parity(c.cp)!==parity(c.ep))errs.push('มี 2 ชิ้นสลับที่กันอยู่ ลองตรวจสีที่กรอกอีกครั้ง');
+  return errs;
+}
+function showMsg(html){const m=$('#solveMsg');m.innerHTML=html;if(html)m.scrollIntoView({block:'nearest',behavior:reduce?'auto':'smooth'});}
+$('#solveBtn').onclick=()=>{
+  const errs=validate();
+  if(errs.length){showMsg('<div class="errcard"><strong>ยังหาวิธีแก้ไม่ได้</strong><ul>'+errs.map(e=>'<li>'+e+'</li>').join('')+'</ul><p class="small" style="margin:0">ถ้ากรอกถูกหมดแล้วยังขึ้นข้อความนี้ รูบิคอาจเคยถูกแกะแล้วประกอบกลับผิด</p></div>');return;}
+  showMsg(`<div class="infocard">${solverReady?'กำลังคำนวณ…':'กำลังเตรียมตัวคำนวณ ครั้งแรกอาจใช้เวลา 5–10 วินาที'}</div>`);
+  $('#solveBtn').disabled=true;
+  setTimeout(()=>{
+    try{
+      if(!solverReady){Cube.initSolver();solverReady=true;}
+      const s=entry.join(''),sol=Cube.fromString(s).solve().trim(),moves=split(sol);
+      if(!moves.length){showMsg('<div class="infocard"><strong>ลูกนี้เรียงเสร็จอยู่แล้ว</strong></div>');return;}
+      const chunks=[];for(let i=0;i<moves.length;i+=5)chunks.push('<span>'+moves.slice(i,i+5).join(' ')+'</span>');
+      showMsg(`<div class="card result"><h2>วิธีแก้ ${moves.length} ท่า</h2><div class="solmoves">${chunks.join('')}</div>
+        <p class="muted small" style="margin:0 0 12px">ถือสี${N.U}ไว้บน สี${N.F}ไว้หน้าตลอด ห้ามหมุนทั้งลูก แล้วกดปุ่ม <b>ทีละท่า</b> ที่ใต้ลูกบาศก์ หมุนลูกจริงตามทีละท่า</p>
+        <button class="btn primary big" id="follow">${ICON.play}เริ่มทำตามทีละท่า</button>
+        <p class="muted small" style="margin:10px 0 0">วิธีนี้คอมพิวเตอร์คำนวณให้สั้นที่สุด จึงไม่ได้แบ่งตาม 7 ขั้นในบทเรียน</p></div>`);
+      loadDemo(`ทำตามวิธีแก้`,sol,s,false,'solution');
+      $('#follow').onclick=()=>{if(innerWidth<980)scrollTo({top:0,behavior:reduce?'auto':'smooth'});};
+    }catch(e){showMsg('<div class="errcard"><strong>คำนวณไม่สำเร็จ</strong><p class="small" style="margin:4px 0 0">ลองตรวจสีที่กรอกอีกครั้ง</p></div>');}
+    finally{$('#solveBtn').disabled=false;}
+  },60);
+};
+
+// ---------- colors & photo ----------
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const hex=([r,g,b])=>'#'+[r,g,b].map(v=>clamp(Math.round(v),0,255).toString(16).padStart(2,'0')).join('');
+const unhex=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+function lab([r,g,b]){
+  const f=v=>{v/=255;return v>.04045?Math.pow((v+.055)/1.055,2.4):v/12.92;};
+  const R=f(r),G=f(g),B=f(b);
+  let x=(R*.4124+G*.3576+B*.1805)/.95047,y=R*.2126+G*.7152+B*.0722,z=(R*.0193+G*.1192+B*.9505)/1.08883;
+  const h=t=>t>.008856?Math.cbrt(t):7.787*t+16/116;x=h(x);y=h(y);z=h(z);
+  return[116*y-16,500*(x-y),200*(y-z)];}
+const dist=(a,b)=>Math.hypot((a[0]-b[0])*.6,a[1]-b[1],a[2]-b[2]);
+function colorName([r,g,b]){
+  r/=255;g/=255;b/=255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b),l=(mx+mn)/2,d=mx-mn;
+  const sat=d===0?0:d/(1-Math.abs(2*l-1));
+  if(sat<.2||d<.12)return l>.5?'ขาว':l<.2?'ดำ':'เทา';
+  let h=mx===r?((g-b)/d)%6:mx===g?(b-r)/d+2:(r-g)/d+4;h=(h*60+360)%360;
+  if(h>=290&&h<340)return'ชมพู';
+  if(h>=340||h<12)return l>.68?'ชมพู':'แดง';
+  if(h<42)return'ส้ม';if(h<70)return'เหลือง';
+  if(h<150)return l>.62?'เขียวอ่อน':'เขียว';
+  if(h<195)return'เขียวมิ้นท์';
+  if(h<255)return l>.6?'ฟ้า':'น้ำเงิน';
+  return'ม่วง';}
+function classify(){
+  const refs={};for(const f of ORDER)refs[f]=samples[f]?samples[f][4]:lab(unhex(COL[f]));
+  const cells=[];
+  ORDER.split('').forEach((f,fi)=>{if(!samples[f])return;for(let k=0;k<9;k++){const idx=fi*9+k;if(k===4||overrides.has(idx))continue;cells.push([idx,samples[f][k]]);}});
+  if(ORDER.split('').every(f=>samples[f])){
+    const cap={};for(const f of ORDER)cap[f]=8;
+    overrides.forEach(i=>{if(i%9!==4&&cap[entry[i]]!==undefined)cap[entry[i]]--;});
+    const pairs=[];cells.forEach(([idx,c])=>{for(const f of ORDER)pairs.push([dist(c,refs[f]),idx,f]);});
+    pairs.sort((a,b)=>a[0]-b[0]);const done=new Set();
+    for(const[,idx,f]of pairs){if(done.has(idx)||cap[f]<=0)continue;entry[idx]=f;cap[f]--;done.add(idx);}
+    cells.forEach(([idx])=>{if(!done.has(idx))entry[idx]='X';});
+  }else cells.forEach(([idx,c])=>{let best='X',bd=1e9;for(const f of ORDER){const d=dist(c,refs[f]);if(d<bd){bd=d;best=f;}}entry[idx]=best;});
+  saveEntry();
+}
+function renderColorRows(){
+  const box=$('#colorRows');if(box.contains(document.activeElement))return;box.textContent='';
+  for(const f of 'UFRBLD'){
+    const row=el('div','crow');
+    const c=document.createElement('input');c.type='color';c.value=COL[f];c.setAttribute('aria-label',`สีกลาง${POS[f]}`);
+    c.oninput=()=>{COL[f]=c.value;saveColors();cubies.forEach(paint);renderEditor();};
+    const t=document.createElement('input');t.type='text';t.value=NAME[f];t.maxLength=14;t.setAttribute('aria-label',`ชื่อสีกลาง${POS[f]}`);
+    t.oninput=()=>{NAME[f]=t.value.trim()||DEF_NAME[f];saveColors();renderEditor();};t.onblur=()=>renderEditor();
+    row.append(c,t,el('small','','กลาง'+POS[f]));box.appendChild(row);}
+}
+function confirmTap(btn,fn){
+  const label=btn.textContent;
+  btn.onclick=()=>{
+    if(btn.classList.contains('confirm')){clearTimeout(btn._t);btn.classList.remove('confirm');btn.textContent=label;fn();return;}
+    btn.classList.add('confirm');btn.textContent='แตะอีกครั้งเพื่อยืนยัน';
+    btn._t=setTimeout(()=>{btn.classList.remove('confirm');btn.textContent=label;},3000);
+  };
+}
+confirmTap($('#resetColors2'),()=>{Object.assign(COL,DEF_COL);Object.assign(NAME,DEF_NAME);saveColors();samples={};cubies.forEach(paint);renderEditor();renderPlayer();showMsg('');toast('คืนค่าสีมาตรฐานแล้ว');});
+confirmTap($('#clearAll2'),async()=>{entry=blankEntry();samples={};overrides.clear();saveEntry();showMsg('');curFace='F';await enterEdit();toast('ล้างสีที่กรอกแล้ว');});
+$('#colorReset').onclick=()=>{Object.assign(COL,DEF_COL);Object.assign(NAME,DEF_NAME);saveColors();cubies.forEach(paint);renderEditor();renderPlayer();};
+
+const pc=$('#pc'),pIn=$('#photoIn'),sheet=$('#sheet');
+const openSheet=()=>{sheet.hidden=false;document.body.style.overflow='hidden';drawPhoto();$('#pUse').focus();};
+const closeSheet=()=>{sheet.hidden=true;document.body.style.overflow='';photo=null;};
+function onPick(e){
+  const input=e.target,file=input.files&&input.files[0];input.value='';if(!file)return;
+  const rd=new FileReader();
+  rd.onload=()=>{const img=new Image();
+    img.onload=()=>{const k=Math.min(1,900/Math.max(img.naturalWidth,img.naturalHeight));
+      const cv=document.createElement('canvas');cv.width=Math.round(img.naturalWidth*k);cv.height=Math.round(img.naturalHeight*k);
+      cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
+      photo={cv,cx:cv.width/2,cy:cv.height/2,s:Math.min(cv.width,cv.height)*.6};$('#psize').value=60;openSheet();};
+    img.onerror=()=>showMsg('<div class="errcard"><strong>เปิดรูปนี้ไม่ได้</strong><p class="small" style="margin:4px 0 0">ลองถ่ายใหม่อีกครั้ง</p></div>');
+    img.src=rd.result;};
+  rd.readAsDataURL(file);
+}
+pIn.onchange=onPick;$('#camIn').onchange=onPick;
+
+// live camera fallback
+const liveSheet=$('#liveSheet'),video=$('#video');let stream=null;
+const GUIDE=.62;
+function stopLive(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}video.srcObject=null;liveSheet.hidden=true;document.body.style.overflow='';}
+function sizeGuide(){const w=video.clientWidth,h=video.clientHeight,g=$('#guide');if(!w||!h)return;const s=Math.min(w,h)*GUIDE;g.style.width=g.style.height=s+'px';}
+$('#liveBtn').onclick=async()=>{
+  const fail=m=>showMsg(`<div class="errcard"><strong>เปิดกล้องไม่ได้</strong><p class="small" style="margin:4px 0 0">${m}</p></div>`);
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){fail('แอปที่เปิดหน้านี้อยู่ไม่อนุญาตให้ใช้กล้อง ลองเปิดลิงก์นี้ในเบราว์เซอร์ Chrome หรือ Safari');return;}
+  try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:1280}},audio:false});}
+  catch(err){fail(err&&err.name==='NotAllowedError'?'ยังไม่ได้อนุญาตให้ใช้กล้อง ลองกดอนุญาต หรือเปิดลิงก์นี้ในเบราว์เซอร์ Chrome หรือ Safari':'ลองเปิดลิงก์นี้ในเบราว์เซอร์ Chrome หรือ Safari แล้วกดถ่ายรูปอีกครั้ง');return;}
+  const w=WIZ.find(w=>w[0]===curFace);$('#liveTop').textContent=' '+(w[3]()||`ฝั่งตรงข้ามกับสี${N.F}`);
+  liveSheet.hidden=false;document.body.style.overflow='hidden';video.srcObject=stream;
+  video.onloadedmetadata=()=>{video.play().catch(()=>{});sizeGuide();};video.onresize=sizeGuide;
+};
+$('#liveCancel').onclick=stopLive;
+liveSheet.addEventListener('click',e=>{if(e.target===liveSheet)stopLive();});
+$('#liveShot').onclick=()=>{
+  const vw=video.videoWidth,vh=video.videoHeight;if(!vw||!vh)return;
+  const k=Math.min(1,900/Math.max(vw,vh)),cv=document.createElement('canvas');cv.width=Math.round(vw*k);cv.height=Math.round(vh*k);
+  cv.getContext('2d').drawImage(video,0,0,cv.width,cv.height);stopLive();
+  photo={cv,cx:cv.width/2,cy:cv.height/2,s:Math.min(cv.width,cv.height)*GUIDE};$('#psize').value=Math.round(GUIDE*100);openSheet();
+};
+addEventListener('resize',sizeGuide);
+function sampleCells(){
+  const ctx=photo.cv.getContext('2d',{willReadFrequently:true}),out=[],cell=photo.s/3,half=Math.max(1,cell*.18);
+  for(let r=0;r<3;r++)for(let c=0;c<3;c++){
+    const x=clamp(Math.round(photo.cx+(c-1)*cell-half),0,photo.cv.width-1),y=clamp(Math.round(photo.cy+(r-1)*cell-half),0,photo.cv.height-1);
+    const w=Math.max(1,Math.min(Math.round(half*2),photo.cv.width-x)),h=Math.max(1,Math.min(Math.round(half*2),photo.cv.height-y));
+    const d=ctx.getImageData(x,y,w,h).data;let R=0,G=0,B=0,n=0;
+    for(let i=0;i<d.length;i+=4){R+=d[i];G+=d[i+1];B+=d[i+2];n++;}
+    out.push([R/n,G/n,B/n]);}
+  return out;}
+function drawPhoto(){
+  if(!photo||sheet.hidden)return;
+  const dpr=devicePixelRatio||1,cs=getComputedStyle(pc.parentElement),maxW=pc.parentElement.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight),maxH=innerHeight*.5;
+  const sc=Math.min(maxW/photo.cv.width,maxH/photo.cv.height),W=photo.cv.width*sc,H=photo.cv.height*sc;
+  pc.width=Math.round(W*dpr);pc.height=Math.round(H*dpr);pc.style.width=W+'px';pc.style.height=H+'px';
+  const g=pc.getContext('2d');g.setTransform(dpr*sc,0,0,dpr*sc,0,0);g.drawImage(photo.cv,0,0);
+  const{cx,cy,s}=photo,x0=cx-s/2,y0=cy-s/2,lw=1/sc;
+  g.fillStyle='rgba(0,0,0,.5)';g.beginPath();g.rect(0,0,photo.cv.width,photo.cv.height);g.rect(x0,y0,s,s);g.fill('evenodd');
+  g.strokeStyle='#fff';g.lineWidth=2.5*lw;g.strokeRect(x0,y0,s,s);
+  g.lineWidth=lw;for(let i=1;i<3;i++){g.beginPath();g.moveTo(x0+i*s/3,y0);g.lineTo(x0+i*s/3,y0+s);g.moveTo(x0,y0+i*s/3);g.lineTo(x0+s,y0+i*s/3);g.stroke();}
+  sampleCells().forEach((col,k)=>{const x=cx+((k%3)-1)*s/3,y=cy+((k/3|0)-1)*s/3;g.beginPath();g.arc(x,y,Math.max(6*lw,s*.05),0,7);g.fillStyle=hex(col);g.fill();g.lineWidth=2.5*lw;g.strokeStyle='#fff';g.stroke();});
+  photo.sc=sc;
+}
+let pdrag=null;
+pc.addEventListener('pointerdown',e=>{if(!photo)return;pdrag={x:e.clientX,y:e.clientY,cx:photo.cx,cy:photo.cy};pc.setPointerCapture(e.pointerId);});
+pc.addEventListener('pointermove',e=>{if(!pdrag||!photo)return;photo.cx=clamp(pdrag.cx+(e.clientX-pdrag.x)/photo.sc,0,photo.cv.width);photo.cy=clamp(pdrag.cy+(e.clientY-pdrag.y)/photo.sc,0,photo.cv.height);drawPhoto();});
+const pend=()=>pdrag=null;pc.addEventListener('pointerup',pend);pc.addEventListener('pointercancel',pend);
+$('#psize').oninput=e=>{if(!photo)return;photo.s=Math.min(photo.cv.width,photo.cv.height)*e.target.value/100;drawPhoto();};
+$('#pRot').onclick=()=>{if(!photo)return;const o=photo.cv,cv=document.createElement('canvas');cv.width=o.height;cv.height=o.width;
+  const g=cv.getContext('2d');g.translate(cv.width,0);g.rotate(Math.PI/2);g.drawImage(o,0,0);
+  photo={cv,cx:o.height-photo.cy,cy:photo.cx,s:photo.s};drawPhoto();};
+$('#pCancel').onclick=closeSheet;
+sheet.addEventListener('click',e=>{if(e.target===sheet)closeSheet();});
+addEventListener('keydown',e=>{if(e.key!=='Escape')return;if(!sheet.hidden)closeSheet();if(!liveSheet.hidden)stopLive();});
+$('#pUse').onclick=async()=>{
+  if(!photo)return;const cols=sampleCells();closeSheet();
+  if(mode!=='edit')await enterEdit();
+  const fi=ORDER.indexOf(curFace);
+  samples[curFace]=cols.map(lab);for(let k=0;k<9;k++)overrides.delete(fi*9+k);
+  COL[curFace]=hex(cols[4]);NAME[curFace]=colorName(cols[4]);saveColors();
+  classify();strToModel(entry.join(''));renderEditor();renderPlayer();
+  const left=WIZ.filter(w=>!samples[w[0]]).length,done=POS[curFace];
+  showMsg(`<div class="infocard">อ่านสี${done}แล้ว ตรวจในตารางว่าตรงกับลูกจริงไหม ถ้าช่องไหนผิด เลือกสีแล้วแตะแก้ได้${left?` จากนั้นกด “ด้านถัดไป” (เหลืออีก ${left} ด้าน) สีที่ยังไม่ได้ถ่ายด้านของมันอาจอ่านเพี้ยนไปก่อน ถ่ายครบ 6 ด้านแล้วแอปจะอ่านใหม่ให้เอง`:' ครบ 6 ด้านแล้ว กด “หาวิธีแก้” ได้เลย'}</div>`);
+};
+addEventListener('resize',()=>drawPhoto());
+
+// ---------- bluetooth (GiiKER / Mi Smart cube) ----------
+const GK={
+ CF:[[26,15,29],[20,8,9],[18,38,6],[24,27,44],[51,35,17],[45,11,2],[47,0,36],[53,42,33]],
+ EF:[[25,28],[23,12],[19,7],[21,41],[32,16],[5,10],[3,37],[30,43],[52,34],[48,14],[46,1],[50,39]],
+ KEY:[176,81,104,224,86,137,237,119,38,26,193,161,210,126,150,81,93,13,236,249,89,235,88,24,113,81,214,131,130,199,2,169,39,165,171,41],
+ CO:[-1,1,-1,1,1,-1,1,-1],
+ parse(dv){
+  const raw=[];for(let i=0;i<20;i++)raw.push(dv.getUint8(i));
+  let n=20;if(raw[18]===0xa7){const k1=raw[19]>>4&15,k2=raw[19]&15;for(let i=0;i<18;i++)raw[i]=(raw[i]+GK.KEY[i+k1]+GK.KEY[i+k2])&255;n=18;}
+  const v=[];for(let i=0;i<n;i++)v.push(raw[i]>>4&15,raw[i]&15);
+  const eo=[];for(let i=0;i<3;i++)for(let m=8;m;m>>=1)eo.push(v[i+28]&m?1:0);
+  const ca=[],ea=[];for(let i=0;i<8;i++)ca[i]=(v[i]-1)|(((3+v[i+8]*GK.CO[i])%3)<<3);
+  for(let i=0;i<12;i++)ea[i]=((v[i+16]-1)<<1)|eo[i];
+  const f=[];for(let i=0;i<54;i++)f[i]=i;
+  for(let c=0;c<8;c++){const j=ca[c]&7,o=ca[c]>>3;for(let k=0;k<3;k++)f[GK.CF[c][(k+o)%3]]=GK.CF[j][k];}
+  for(let e=0;e<12;e++){const j=ea[e]>>1,o=ea[e]&1;for(let k=0;k<2;k++)f[GK.EF[e][(k+o)%2]]=GK.EF[j][k];}
+  const face=['?','B','D','L','U','R','F'][v[32]],dk=v[33]===9?3:v[33];
+  return{facelet:f.map(x=>'URFDLB'[x/9|0]).join(''),move:face&&face!=='?'?face+(['','','2',"'"][dk]||''):null};
+ }
+};
+const U16=x=>`0000${x}-0000-1000-8000-00805f9b34fb`;
+const BT_DATA=U16('aadb'),BT_DATA_C=U16('aadc'),BT_RW=U16('aaaa'),BT_R=U16('aaab'),BT_W=U16('aaac');
+const SOLVED='UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB';
+const bt={on:false,dev:null,w:null,facelet:null,shown:null,name:'',battery:null,moves:[],timer:null};
+const after=(f,m)=>{const c=Cube.fromString(f);c.move(m);return c.asString();};
+let toastT;function toast(t){const e=$('#toast');e.textContent=t;e.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>e.hidden=true,3200);}
+function btUI(){
+  document.body.classList.toggle('bt-on',bt.on);
+  $('#btPill').classList.toggle('on',bt.on);
+  $('#btPillText').textContent=bt.on?(bt.battery!=null?`${bt.battery}%`:'เชื่อมแล้ว'):'เชื่อมลูกบลูทูธ';
+  $('#btOff').hidden=bt.on;$('#btOnView').hidden=!bt.on;
+  $('#btName').textContent=bt.name;$('#btBatt').textContent=bt.battery!=null?`แบตเตอรี่ ${bt.battery}%`:'เชื่อมต่ออยู่';
+  const go=$('#btGo');go.textContent=bt.on?'ยกเลิกการเชื่อม':'เชื่อมต่อ';go.className=bt.on?'btn':'btn primary';go.disabled=false;
+}
+function btError(kind){
+  const T={
+    unsupported:'เบราว์เซอร์นี้ใช้บลูทูธไม่ได้ ต้องเปิดด้วย Chrome บน Android หรือคอมพิวเตอร์ (iPhone และ iPad ใช้ไม่ได้) ถ้าเปิดผ่านแอป Claude หรือแอปอื่นอยู่ ให้คัดลอกลิงก์ไปเปิดใน Chrome',
+    blocked:'หน้านี้ถูกบล็อกไม่ให้ใช้บลูทูธ มักเกิดเมื่อเปิดผ่านแอป Claude หรือแอปอื่น ให้คัดลอกลิงก์ไปเปิดใน Chrome ถ้าเปิดใน Chrome แล้วยังขึ้นข้อความนี้ ต้องนำไฟล์แอปไปเปิดเอง',
+    notfound:'ไม่พบลูก ลองหมุนลูกให้ตื่น เช็กว่าเปิดบลูทูธกับตำแหน่ง (GPS) แล้ว แล้วกดเชื่อมอีกครั้ง',
+    connect:'เชื่อมไม่สำเร็จ ลองหมุนลูกแล้วกดอีกครั้ง หรือปิด-เปิดบลูทูธ ถ้าลูกยังเชื่อมกับแอปอื่นอยู่ ให้ปิดแอปนั้นก่อน'};
+  $('#btMsg').innerHTML=`<div class="errcard"><strong>เชื่อมไม่ได้</strong><p class="small" style="margin:4px 0 0">${T[kind]}</p></div>`;
+}
+async function btWrite(b){if(!bt.w)return;const d=new Uint8Array([b]);
+  try{if(bt.w.writeValueWithoutResponse)await bt.w.writeValueWithoutResponse(d);else await bt.w.writeValue(d);}
+  catch(e){try{await bt.w.writeValue(d);}catch(_){}}}
+async function btConnect(){
+  $('#btMsg').innerHTML='';
+  if(!navigator.bluetooth||!navigator.bluetooth.requestDevice){btError('unsupported');return;}
+  let dev;
+  try{dev=await navigator.bluetooth.requestDevice({filters:[{namePrefix:'Gi'},{namePrefix:'Mi Smart Magic Cube'},{namePrefix:'Hi-'}],optionalServices:[BT_DATA,BT_RW]});}
+  catch(e){if(e&&e.name==='NotFoundError'&&/cancel/i.test(e.message||''))return;
+    btError(e&&e.name==='SecurityError'?'blocked':e&&e.name==='NotFoundError'?'notfound':e&&e.name==='NotAllowedError'?'blocked':'connect');return;}
+  const go=$('#btGo');go.disabled=true;go.textContent='กำลังเชื่อม…';
+  try{
+    dev.addEventListener('gattserverdisconnected',onBtDisconnect);
+    const g=await dev.gatt.connect();
+    const c=await (await g.getPrimaryService(BT_DATA)).getCharacteristic(BT_DATA_C);
+    c.addEventListener('characteristicvaluechanged',e=>{if(e.target.value)onBtData(e.target.value);});
+    await c.startNotifications();
+    const first=GK.parse(await c.readValue());
+    Object.assign(bt,{on:true,dev,facelet:first.facelet,name:dev.name||'GiiKER',battery:null,moves:[]});
+    try{const rw=await g.getPrimaryService(BT_RW);const r=await rw.getCharacteristic(BT_R);bt.w=await rw.getCharacteristic(BT_W);
+      r.addEventListener('characteristicvaluechanged',e=>{const v=e.target.value;if(v&&v.byteLength>1){bt.battery=clamp(v.getUint8(1),0,100);btUI();}});
+      await r.startNotifications();btWrite(0xb5);clearInterval(bt.timer);bt.timer=setInterval(()=>btWrite(0xb5),60000);}catch(e){bt.w=null;}
+    btUI();closeBt();toast('เชื่อมลูกแล้ว หมุนลูกจริงได้เลย');
+    if(curTab==='practice')goLive('practice');else{selectTab(curTab==='learn'?'solve':curTab);}
+  }catch(e){btError('connect');try{dev.gatt.disconnect();}catch(_){}btUI();}
+}
+function onBtDisconnect(){
+  if(!bt.on)return;bt.on=false;bt.w=null;clearInterval(bt.timer);btUI();toast('ลูกบลูทูธหลุดการเชื่อมต่อ');
+  if(mode==='live'||(mode==='demo'&&demo&&demo.live)){mode='intro';demo=null;}
+  if(curTab==='practice'){mode='practice';running=false;armed=false;}
+  renderPlayer();
+}
+function onBtData(dv){
+  const r=GK.parse(dv);if(!bt.on||r.facelet===bt.facelet)return;
+  const prev=bt.facelet;bt.facelet=r.facelet;
+  let mv=null;try{if(r.move&&prev&&after(prev,r.move)===r.facelet)mv=r.move;}catch(e){}
+  if(mv){bt.moves.push(mv);if(bt.moves.length>300)bt.moves.shift();}
+  const liveDemo=mode==='demo'&&demo&&demo.live;
+  if(!(mode==='live'||mode==='practice'||liveDemo))return;
+  mirror(r.facelet,mv);
+  if(mode==='practice'){
+    if(mv)history.push(mv);
+    if(armed&&!running&&mv){running=true;t0=performance.now();elapsed=null;}
+    if(running&&r.facelet===SOLVED){running=false;armed=false;elapsed=performance.now()-t0;}
+  }else if(liveDemo)followUpdate(r.facelet);
+  renderPlayer();
+}
+function mirror(f,mv){
+  let ok=false;try{ok=!!(mv&&bt.shown&&queue.length<3&&after(bt.shown,mv)===f);}catch(e){}
+  bt.shown=f;
+  if(ok)enqueue({tok:mv,dur:reduce?0:110});
+  else{stopAll();idle().then(()=>{if(bt.shown===f)strToModel(f);});}
+}
+async function goLive(m){
+  if(!bt.on)return;stopAll();clearTimeout(autoTimer);await idle();
+  strToModel(bt.facelet);bt.shown=bt.facelet;demo=null;mode=m;
+  if(m==='practice'){history=[];scrambleSeq=[];running=false;elapsed=null;armed=false;}
+  vx=-28;vy=-38;setView();renderPlayer();
+}
+async function loadFollow(title,moves,kind){
+  await goLive(kind==='scramble'?'practice':'live');
+  const states=[bt.facelet],halves=[];let c=Cube.fromString(bt.facelet);
+  for(const m of moves){
+    if(m.endsWith('2')){const s=c.asString();halves.push([after(s,m[0]),after(s,m[0]+"'")]);}else halves.push([]);
+    c.move(m);states.push(c.asString());}
+  mode='demo';demo={title,moves,i:0,now:null,kind,live:true,states,halves,half:false,off:false};
+  if(kind==='scramble')scrambleSeq=moves;
+  renderPlayer();
+}
+function followUpdate(f){
+  const d=demo;let j=d.states[d.i+1]===f?d.i+1:d.states.indexOf(f);
+  if(j>=0){d.i=j;d.half=false;d.off=false;}
+  else if(d.halves[d.i]&&d.halves[d.i].includes(f)){d.half=true;d.off=false;}
+  else{d.off=true;d.half=false;}
+  if(d.i>=d.moves.length){
+    if(d.kind==='scramble'){mode='practice';demo=null;history=[];running=false;elapsed=null;armed=true;toast('สุ่มเสร็จแล้ว หมุนท่าแรกเพื่อเริ่มจับเวลา');}
+    else toast('เรียงเสร็จแล้ว เก่งมาก!');
+  }
+}
+function btScramble(){if(!bt.on)return;loadFollow('หมุนลูกจริงตามเพื่อสุ่ม',genScramble(20),'scramble');toTop();}
+function btSolve(){
+  if(!bt.on)return;const m=$('#btSolveMsg');
+  if(bt.facelet===SOLVED){m.innerHTML='<div class="infocard">ลูกเรียงอยู่แล้ว ลองหมุนให้มั่วก่อน แล้วกดอีกครั้ง</div>';return;}
+  m.innerHTML=`<div class="infocard">${solverReady?'กำลังคำนวณ…':'กำลังเตรียมตัวคำนวณ ครั้งแรกอาจใช้เวลา 5–10 วินาที'}</div>`;
+  setTimeout(()=>{
+    try{if(!solverReady){Cube.initSolver();solverReady=true;}
+      const moves=split(Cube.fromString(bt.facelet).solve());m.innerHTML='';
+      loadFollow(`ทำตามวิธีแก้ (${moves.length} ท่า)`,moves,'solution');toTop();}
+    catch(e){m.innerHTML='<div class="errcard"><strong>คำนวณไม่สำเร็จ</strong><p class="small" style="margin:4px 0 0">ลองกดตั้งให้ลูกเป็นลูกที่เรียงแล้วหลังเรียงลูกจริงเสร็จ แล้วลองใหม่</p></div>';}
+  },60);
+}
+const btSheet=$('#btSheet');
+function openBt(){$('#btMsg').innerHTML='';btUI();btSheet.hidden=false;document.body.style.overflow='hidden';}
+function closeBt(){btSheet.hidden=true;document.body.style.overflow='';}
+$('#btPill').onclick=openBt;$('#btClose').onclick=closeBt;
+btSheet.addEventListener('click',e=>{if(e.target===btSheet)closeBt();});
+$('#btGo').onclick=()=>{if(bt.on){const d=bt.dev;onBtDisconnect();try{d.gatt.disconnect();}catch(e){}closeBt();}else btConnect();};
+$('#btReset').onclick=()=>{if(!bt.on)return;btWrite(0xa1);bt.facelet=SOLVED;bt.moves=[];closeBt();toast('ตั้งค่าแล้ว ลูกนี้คือลูกที่เรียงแล้ว');
+  if(mode==='live'||mode==='practice'||(mode==='demo'&&demo&&demo.live))goLive(curTab==='practice'?'practice':'live');};
+$('#btScramble').onclick=btScramble;$('#btSolve').onclick=btSolve;
+addEventListener('keydown',e=>{if(e.key==='Escape'&&!btSheet.hidden)closeBt();});
+
+// ---------- navigation ----------
+let curTab='learn';
+function selectTab(name){
+  curTab=name;
+  for(const[t,id]of[['learn','#navLearn'],['practice','#navPractice'],['solve','#navSolve']]){$(id).setAttribute('aria-selected',t===name);$('#'+t).hidden=t!==name;}
+  if(name==='learn'&&!(mode==='demo'&&demo&&demo.kind==='lesson')){stopAll();clearTimeout(autoTimer);mode='intro';demo=null;renderPlayer();}
+  if(name==='practice'){if(bt.on){if(!(mode==='demo'&&demo&&demo.live&&demo.kind==='scramble'))goLive('practice');}else enterPractice();}
+  if(name==='solve'&&!(mode==='demo'&&demo&&demo.kind==='solution')){if(bt.on)goLive('live');else enterEdit();}
+  if(name!=='solve')renderPad();
+  scrollTo({top:0});
+}
+$('#navLearn').onclick=()=>selectTab('learn');
+$('#navPractice').onclick=()=>selectTab('practice');
+$('#navSolve').onclick=()=>selectTab('solve');
+
+// ---------- view drag ----------
+let drag=null;
+stage.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;drag={x:e.clientX,y:e.clientY,vx,vy};stage.setPointerCapture(e.pointerId);});
+stage.addEventListener('pointermove',e=>{if(!drag)return;vy=drag.vy+(e.clientX-drag.x)*.5;vx=clamp(drag.vx-(e.clientY-drag.y)*.5,-89,89);setView();});
+const endDrag=()=>drag=null;stage.addEventListener('pointerup',endDrag);stage.addEventListener('pointercancel',endDrag);
+$('#resetView').onclick=()=>{vx=-28;vy=-38;setView();};
+
+let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(async()=>{await idle();layout();},120);});
+build();setView();renderLesson();renderPad();renderPlayer();
+})();
+</script>
+</body>
+</html>
