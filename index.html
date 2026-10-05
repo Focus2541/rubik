@@ -2840,7 +2840,7 @@ function solutionCard(f,live,target){
 }
 $('#solveBtn').onclick=()=>{
   const errs=validate();
-  if(errs.length){showMsg('<div class="errcard"><strong>ยังหาวิธีแก้ไม่ได้</strong><ul>'+errs.map(e=>'<li>'+e+'</li>').join('')+'</ul><p class="small" style="margin:0">ถ้ากรอกถูกหมดแล้วยังขึ้นข้อความนี้ รูบิคอาจเคยถูกแกะแล้วประกอบกลับผิด</p></div>');return;}
+  if(errs.length){showMsg('<div class="errcard"><strong>ยังหาวิธีแก้ไม่ได้</strong><ul>'+errs.map(e=>'<li>'+e+'</li>').join('')+'</ul><p class="small" style="margin:0">'+(errs.some(e=>/บิด|กลับด้าน|สลับที่/.test(e))?`สาเหตุที่พบบ่อยคือถือลูกผิดทิศตอนกรอกบางด้าน ให้ถือกลางสี${N.U}ไว้บน กลางสี${N.F}หันหาตัวทุกครั้ง และเช็กว่าชื่อสีในแถบเลือกสีตรงกับสีจริง `:'')+(bt.on?'<b>ลูกบลูทูธเชื่อมอยู่ ไม่ต้องกรอกสีเอง กดปุ่ม “หาวิธีแก้จากลูกบลูทูธ” ด้านบนได้เลย</b>':'ถ้ากรอกถูกหมดแล้วยังขึ้นข้อความนี้ รูบิคอาจเคยถูกแกะแล้วประกอบกลับผิด')+'</p></div>');return;}
   const f=entry.join('');if(f===SOLVED){showMsg('<div class="infocard"><strong>ลูกนี้เรียงเสร็จอยู่แล้ว</strong></div>');return;}
   solutionCard(f,false,$('#solveMsg'));$('#solveMsg').scrollIntoView({block:'nearest'});
 };
@@ -2888,6 +2888,7 @@ function renderColorRows(){
     const row=el('div','crow');
     const c=document.createElement('input');c.type='color';c.value=COL[f];c.setAttribute('aria-label',`สีกลาง${POS[f]}`);
     c.oninput=()=>{COL[f]=c.value;saveColors();cubies.forEach(paint);renderEditor();};
+    c.onchange=()=>{NAME[f]=colorName(unhex(c.value));saveColors();c.blur();renderEditor();box.textContent='';renderColorRows();};
     const t=document.createElement('input');t.type='text';t.value=NAME[f];t.maxLength=14;t.setAttribute('aria-label',`ชื่อสีกลาง${POS[f]}`);
     t.oninput=()=>{NAME[f]=t.value.trim()||DEF_NAME[f];saveColors();renderEditor();};t.onblur=()=>renderEditor();
     row.append(c,t,el('small','','กลาง'+POS[f]));box.appendChild(row);}
@@ -2900,7 +2901,8 @@ function confirmTap(btn,fn){
     btn._t=setTimeout(()=>{btn.classList.remove('confirm');btn.textContent=label;},3000);
   };
 }
-confirmTap($('#resetColors2'),()=>{Object.assign(COL,DEF_COL);Object.assign(NAME,DEF_NAME);saveColors();samples={};cubies.forEach(paint);renderEditor();renderPlayer();showMsg('');toast('คืนค่าสีมาตรฐานแล้ว');});
+confirmTap($('#resetColors2'),()=>{Object.assign(COL,DEF_COL);Object.assign(NAME,DEF_NAME);saveColors();samples={};try{localStorage.removeItem('rubik-bt-cal');}catch(e){}cubies.forEach(paint);renderEditor();renderPlayer();showMsg('');
+  if(bt.on){openBt();startCal();toast('คืนค่าสีแล้ว มาตั้งสีลูกบลูทูธใหม่กัน');}else toast('คืนค่าสีมาตรฐานแล้ว');});
 confirmTap($('#clearAll2'),async()=>{entry=blankEntry();samples={};overrides.clear();saveEntry();showMsg('');curFace='F';await enterEdit();toast('ล้างสีที่กรอกแล้ว');});
 $('#colorReset').onclick=()=>{Object.assign(COL,DEF_COL);Object.assign(NAME,DEF_NAME);saveColors();cubies.forEach(paint);renderEditor();renderPlayer();renderLesson();};
 
