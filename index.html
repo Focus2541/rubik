@@ -186,6 +186,34 @@ details.card[open] summary::after{content:"–"}
 
 .resetrow .btn{padding:9px 10px;font-size:14px}
 .resetrow .btn.confirm{background:var(--warn-soft);color:var(--warn);box-shadow:none}
+.mv .note2{display:block;font-size:13px;color:var(--accent);line-height:1.4;margin-top:2px}
+.mv .note2:empty{display:none}
+.seg{display:flex;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.seg:first-of-type{border-top:0}
+.seg .badge{width:34px;height:34px;border-radius:10px;font-size:15px}
+.seg b{display:block;font:500 15px Mitr,sans-serif}
+.seg code{display:block;font:500 16px/1.6 Mitr,sans-serif;word-spacing:.2em}
+.seg small{color:var(--muted);font-size:13px}
+.methods{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--surface2);padding:4px;border-radius:14px;margin:10px 0 6px}
+.methods button{border:0;background:none;border-radius:11px;padding:8px 6px;font:500 14px Mitr,sans-serif;color:var(--muted)}
+.methods button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.coach{display:none}
+body.bt-on .coach{display:block}
+.coach .stage-row{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:12px 0 4px}
+.coach .stage-row i{height:8px;border-radius:4px;background:var(--surface2)}
+.coach .stage-row i.on{background:var(--ok)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.stats div{background:var(--surface2);border-radius:14px;padding:8px 6px;text-align:center}
+.stats b{display:block;font:500 19px Mitr,sans-serif}
+.stats small{font-size:12px;color:var(--muted)}
+.spark{display:block;width:100%;height:56px;margin-top:12px}
+.tlist{list-style:none;margin:10px 0 0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:4px 14px}
+.tlist li{display:flex;justify-content:space-between;font-size:14px;padding:4px 0;border-bottom:1px solid var(--line)}
+.tlist li b{font:500 15px Mitr,sans-serif}
+.tlist li.best b{color:var(--ok)}
+.calbox{background:var(--surface2);border-radius:16px;padding:12px 14px;margin-top:12px}
+.calbox[hidden]{display:none}
+.calbox .big{font:500 17px Mitr,sans-serif}
 /* bluetooth */
 .btpill{margin-left:auto;border:0;border-radius:999px;padding:7px 13px 7px 10px;display:inline-flex;align-items:center;gap:6px;background:var(--surface);box-shadow:var(--shadow);font:500 13px Mitr,sans-serif;color:var(--accent)}
 .btpill svg{width:18px;height:18px}
@@ -224,7 +252,7 @@ body.bt-on .nobt{display:none}
       <button class="viewbtn" id="resetView" type="button" aria-label="มุมมองเดิม"><svg class="i" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.5-5.8"/><path d="M4 4v4h4"/></svg></button>
     </div>
     <div class="player" aria-live="polite">
-      <div class="mv"><b id="mvBig">3×3</b><div><strong id="mvTitle"></strong><span id="mvDesc"></span></div></div>
+      <div class="mv"><b id="mvBig">3×3</b><div><strong id="mvTitle"></strong><span id="mvDesc"></span><span class="note2" id="mvNote"></span></div></div>
       <div class="track" id="track"><i id="trackFill"></i></div>
       <div class="chips" id="chips"></div>
       <div class="ctrls" id="ctrls"></div>
@@ -233,6 +261,16 @@ body.bt-on .nobt{display:none}
 
   <main class="right">
     <section class="screen" id="learn">
+      <div class="card coach" id="coach">
+        <div class="btinfo"><svg class="i" viewBox="0 0 24 24"><path d="M7 7l10 10-5 4V3l5 4L7 17"/></svg><div>โค้ชลูกจริง<small id="coachSub">หมุนลูกจริง แล้วแอปจะบอกว่าทำถึงขั้นไหน</small></div></div>
+        <div class="stage-row" id="coachBar"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <p id="coachText" style="margin:8px 0 0"></p>
+        <div class="row">
+          <button class="btn" id="coachGo">ไปบทเรียน</button>
+          <button class="btn primary" id="coachHint">ใบ้ทีละท่า</button>
+        </div>
+        <button class="btn ghost big" id="coachShow" style="margin-top:8px;font-size:14px;padding:10px">แสดงลูกจริงบนจอ</button>
+      </div>
       <div class="stepper" id="stepper"></div>
       <article class="card" id="lesson"></article>
     </section>
@@ -253,6 +291,14 @@ body.bt-on .nobt{display:none}
           <button class="btn" id="reset">เริ่มจากลูกที่เรียงแล้ว</button>
         </div>
         <button class="btn ghost big nobt" id="unscramble" style="margin-top:8px;font-size:15px;padding:12px">ย้อนท่าทั้งหมดจนเรียงให้ดู</button>
+      </div>
+      <div class="card" id="statsCard">
+        <h2 style="font-size:20px">สถิติเวลา</h2>
+        <p class="muted small" style="margin:2px 0 0">บันทึกอัตโนมัติทุกครั้งที่สุ่มโจทย์แล้วเรียงเสร็จ</p>
+        <div class="stats" id="stats"></div>
+        <svg class="spark" id="spark" viewBox="0 0 300 56" preserveAspectRatio="none" aria-hidden="true"></svg>
+        <ul class="tlist" id="tlist"></ul>
+        <button class="btn ghost" id="clearTimes" style="width:100%;margin-top:12px;padding:10px;font-size:14px">ล้างประวัติเวลา</button>
       </div>
     </section>
 
@@ -307,7 +353,7 @@ body.bt-on .nobt{display:none}
 <div class="sheet-back" id="sheet" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
     <h3 id="sheetTitle">จัดกรอบให้ตรงหน้ารูบิค</h3>
-    <p>ลากกรอบให้วงกลมอยู่กลางสติกเกอร์ทุกช่อง ด้านบนของรูปต้องเป็น<span id="photoTop"></span></p>
+    <p><span id="sheetHint">ลากกรอบให้วงกลมอยู่กลางสติกเกอร์ทุกช่อง</span> ด้านบนของรูปต้องเป็น<span id="photoTop"></span></p>
     <canvas id="pc"></canvas>
     <label class="rangerow">ขนาดกรอบ <input type="range" id="psize" min="15" max="100" value="60"></label>
     <div class="sheetbtns">
@@ -341,7 +387,18 @@ body.bt-on .nobt{display:none}
     <div id="btOnView" hidden>
       <div class="btinfo"><svg class="i" viewBox="0 0 24 24"><path d="M7 7l10 10-5 4V3l5 4L7 17"/></svg><div><span id="btName"></span><small id="btBatt"></small></div></div>
       <p>ถ้าลูกในจอไม่ตรงกับลูกจริง ให้เรียงลูกจริงให้เสร็จ แล้วกด “ตั้งให้ลูกนี้เป็นลูกที่เรียงแล้ว” ถ้าสีในจอไม่ตรงกับลูกจริง ตั้งสีได้ที่หน้า แก้ลูกจริง &gt; สีของรูบิคและเครื่องมือ</p>
+      <button class="btn primary" id="btCalStart" style="width:100%;margin-bottom:8px">ตั้งสีและทิศทางลูกนี้อัตโนมัติ</button>
       <button class="btn" id="btReset" style="width:100%">ตั้งให้ลูกนี้เป็นลูกที่เรียงแล้ว</button>
+      <div class="calbox" id="calBox" hidden>
+        <div id="calPick">
+          <p style="margin:0 0 8px">ลูกนี้ใช้สีแบบไหน</p>
+          <div class="row" style="margin:0"><button class="btn" data-scheme="pastel">ชมพู / มิ้นท์</button><button class="btn" data-scheme="std">แดง / เขียว</button></div>
+        </div>
+        <div id="calStep" hidden>
+          <p class="big" id="calText" style="margin:0"></p>
+          <p class="muted small" id="calSub" style="margin:6px 0 0"></p>
+        </div>
+      </div>
     </div>
     <div id="btMsg"></div>
     <div class="row" style="margin-top:14px">
@@ -2487,12 +2544,12 @@ const stopAll=()=>{queue=[];};
 let mode='intro',demo=null,history=[],scrambleSeq=[],armed=false,t0=0,elapsed=null,running=false,autoTimer=null;
 const toTop=()=>{if(innerWidth<980)scrollTo({top:0,behavior:reduce?'auto':'smooth'});};
 
-async function loadDemo(title,alg,setup,autoplay,kind){
+async function loadDemo(title,alg,setup,autoplay,kind,segs){
   stopAll();clearTimeout(autoTimer);await idle();build();
   const moves=split(alg);
   if(setup&&setup.length===54)strToModel(setup);
   else{(setup==='none'?[]:invert(moves)).forEach(applyModel);cubies.forEach(renderC);}
-  mode='demo';demo={title,alg,setup,moves,i:0,now:null,kind:kind||'lesson'};renderPlayer();
+  mode='demo';demo={title,alg,setup,moves,i:0,now:null,kind:kind||'lesson',segs};renderPlayer();
   if(autoplay)autoTimer=setTimeout(()=>playDemo(true),reduce?100:600);
 }
 function playDemo(all){
@@ -2506,15 +2563,25 @@ function stepBack(){
   enqueue({tok:inv(d.moves[k]),dur:380,before:()=>{d.now=k;renderPlayer();},after:()=>{d.i=k;d.now=null;renderPlayer();}});
 }
 const fmt=ms=>(ms/1000).toFixed(1);
+function segInfo(d,idx,tt){
+  if(!d.segs||!d.segs.length)return;const i=Math.min(idx,d.moves.length-1);
+  const g=d.segs.find(g=>i>=g.start&&i<g.end)||d.segs[d.segs.length-1];
+  if(idx>=d.moves.length)return;
+  tt.textContent=`ขั้น ${g.step}/7 ${g.title}`;$('#mvNote').textContent=g.note;
+}
+function flatSegs(segs){let a=0;const out=[],moves=[];for(const g of segs){out.push({step:g.step,title:g.title,note:g.note,start:a,end:a+g.moves.length});a+=g.moves.length;moves.push(...g.moves);}return{segs:out,moves};}
+function segHTML(segs){
+  return segs.map(g=>`<div class="seg"><span class="badge" style="--sc:${stepCol(g.step)};--sci:${inkOn(stepCol(g.step))}">${g.step}</span><div><b>${g.title}</b><small>${g.note}</small><code>${g.moves.join(' ')}</code></div></div>`).join('');
+}
 
 function renderPlayer(){
   const big=$('#mvBig'),tt=$('#mvTitle'),ds=$('#mvDesc'),chips=$('#chips'),ctr=$('#ctrls'),fill=$('#trackFill'),track=$('#track');
-  big.className='';ds.className='';chips.textContent='';ctr.textContent='';ctr.hidden=true;track.hidden=true;chips.hidden=true;
+  $('#mvNote').textContent='';big.className='';ds.className='';chips.textContent='';ctr.textContent='';ctr.hidden=true;track.hidden=true;chips.hidden=true;
   const chip=(t,c)=>{const s=document.createElement('span');s.className='chip '+(c||'');s.textContent=t;chips.appendChild(s);return s;};
   const cbtn=(html,label,fn,primary,dis)=>{const b=document.createElement('button');b.type='button';b.className='cbtn'+(primary?' primary':'');b.innerHTML=html;b.setAttribute('aria-label',label);b.disabled=!!dis;b.onclick=fn;ctr.appendChild(b);};
   if(mode==='demo'&&demo&&demo.live){
     const d=demo,n=d.moves.length,done=d.i>=n;
-    tt.textContent=d.title;
+    tt.textContent=d.title;segInfo(d,d.i,tt);
     if(done){big.textContent='✓';big.className='ok';ds.textContent='เรียงเสร็จแล้ว เก่งมาก!';ds.className='ok';}
     else{big.textContent=d.moves[d.i];big.className=d.off?'warn':'now';
       ds.textContent=d.off?'ลูกไม่ตรงกับท่าที่บอก ลองหมุนกลับ หรือกดคำนวณใหม่':d.half?`หมุน ${d.moves[d.i][0]} ต่ออีก 1 ครั้ง`:`หมุนลูกจริง: ${describe(d.moves[d.i])} (${d.i+1}/${n})`;}
@@ -2522,7 +2589,8 @@ function renderPlayer(){
     chips.hidden=false;let el=null;d.moves.forEach((t,k)=>{const e=chip(t,k<d.i?'done':k===d.i?'next':'');if(k===d.i)el=e;});
     if(el)requestAnimationFrame(()=>{chips.scrollLeft=el.offsetLeft-chips.clientWidth/2+el.offsetWidth/2;});
     ctr.hidden=false;ctr.style.gridTemplateColumns='1fr 1fr';
-    if(d.kind==='solution')cbtn(ICON.restart+'คำนวณใหม่','คำนวณวิธีแก้ใหม่จากลูกตอนนี้',btSolve,!done&&d.off);
+    if(d.kind==='solution')cbtn(ICON.restart+'คำนวณใหม่','คำนวณวิธีแก้ใหม่จากลูกตอนนี้',()=>{goLive('live');selectTab('solve');btSolve();},!done&&d.off);
+    else if(d.kind==='hint')cbtn(ICON.restart+'ใบ้ใหม่','ใบ้ใหม่จากลูกตอนนี้',coachHint,!done&&d.off);
     else cbtn(ICON.restart+'สุ่มใหม่','สุ่มโจทย์ใหม่',btScramble,false);
     cbtn('เลิก','เลิกทำตาม',()=>goLive(curTab==='practice'?'practice':'live'),false);
     return;
@@ -2536,8 +2604,8 @@ function renderPlayer(){
     return;
   }
   if(mode==='demo'&&demo){
-    const d=demo,n=d.moves.length,done=d.i>=n&&!busy,cur=d.now!=null?d.now:d.i;
-    tt.textContent=d.title;
+    const d=demo,n=d.moves.length,done=d.i>=n&&(!busy||d.now==null),cur=Math.min(d.now!=null?d.now:d.i,n-1);
+    tt.textContent=d.title;segInfo(d,cur,tt);
     if(done){big.textContent='✓';big.className='ok';ds.textContent=d.kind==='solution'?'เรียงเสร็จแล้ว เก่งมาก!':'จบท่าแล้ว';ds.className='ok';}
     else{big.textContent=d.moves[cur];if(d.now!=null)big.className='now';ds.textContent=(d.now!=null?'':'ท่าต่อไป: ')+describe(d.moves[cur])+`  (${cur+1}/${n})`;}
     track.hidden=false;fill.style.width=(d.i/n*100)+'%';
@@ -2545,10 +2613,10 @@ function renderPlayer(){
       d.moves.forEach((t,k)=>{const e=chip(t,k===d.now?'now':k<d.i?'done':(k===d.i&&!busy)?'next':'');if(k===cur)el=e;});
       if(el)requestAnimationFrame(()=>{chips.scrollLeft=el.offsetLeft-chips.clientWidth/2+el.offsetWidth/2;});}
     ctr.hidden=false;
-    cbtn(ICON.restart,'เริ่มใหม่',()=>loadDemo(d.title,d.alg,d.setup,false,d.kind),false,busy);
+    cbtn(ICON.restart,'เริ่มใหม่',()=>loadDemo(d.title,d.alg,d.setup,false,d.kind,d.segs),false,busy);
     cbtn(ICON.back,'ย้อน 1 ท่า',stepBack,false,busy||d.i===0);
     if(busy)cbtn(ICON.pause+'หยุด','หยุด',stopAll,true);
-    else if(done)cbtn(ICON.restart+'ดูอีกครั้ง','ดูอีกครั้ง',()=>loadDemo(d.title,d.alg,d.setup,true,d.kind),true);
+    else if(done)cbtn(ICON.restart+'ดูอีกครั้ง','ดูอีกครั้ง',()=>loadDemo(d.title,d.alg,d.setup,true,d.kind,d.segs),true);
     else cbtn(ICON.play+'เล่นทั้งหมด','เล่นทั้งหมด',()=>playDemo(true),true);
     cbtn(ICON.next,'ทีละท่า',()=>playDemo(false),false,busy||done);
   }else if(mode==='practice'){
@@ -2602,13 +2670,17 @@ let curStep=0;try{curStep=Math.min(7,Math.max(0,+localStorage.getItem('rubik-ste
 const saveProg=()=>{try{localStorage.setItem('rubik-progress',JSON.stringify(prog));localStorage.setItem('rubik-step',curStep);}catch(e){}};
 function el(tag,cls,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e;}
 function goStep(i){curStep=i;saveProg();renderLesson();if(innerWidth<980){const r=$('#stepper').getBoundingClientRect();if(r.top<0||r.top>innerHeight*.6)$('#stepper').scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});}}
+const CW={'ขาว':'D','เหลือง':'U','เขียว':'F'};
+const ct=t=>t?t.replace(/ขาว|เหลือง|เขียว/g,w=>NAME[CW[w]]):t;
+const inkOn=h=>{try{const[r,g,b]=unhex(h);return(r*.299+g*.587+b*.114)>150?'#18213A':'#FFFFFF';}catch(e){return'#18213A';}};
+const stepCol=n=>n<=2?COL.D:n===3?COL.F:COL.U;
 function renderLesson(){
   const sp=$('#stepper');sp.textContent='';
   STEPS.forEach((s,i)=>{const b=el('button','pill'+(prog[i]?' done':''),prog[i]&&i!==curStep?'✓':s.n);b.type='button';b.setAttribute('aria-label',`ขั้น ${s.n} ${s.t}`);if(i===curStep)b.setAttribute('aria-current','step');b.onclick=()=>goStep(i);sp.appendChild(b);});
   const cur=sp.children[curStep];requestAnimationFrame(()=>{sp.scrollLeft=cur.offsetLeft-sp.clientWidth/2+cur.offsetWidth/2;});
   const s=STEPS[curStep],L=$('#lesson');L.textContent='';
-  const head=el('div','lhead');const bd=el('span','badge',s.n==='เริ่ม'?'?':s.n);bd.style.setProperty('--sc',s.sc);bd.style.setProperty('--sci',s.sci);
-  const ht=el('div');ht.append(el('h2','',s.t),el('p','',s.goal));head.append(bd,ht);L.appendChild(head);
+  const head=el('div','lhead');const bd=el('span','badge',s.n==='เริ่ม'?'?':s.n);if(curStep){bd.style.setProperty('--sc',stepCol(curStep));bd.style.setProperty('--sci',inkOn(stepCol(curStep)));}else{bd.style.setProperty('--sc',s.sc);bd.style.setProperty('--sci',s.sci);}
+  const ht=el('div');ht.append(el('h2','',ct(s.t)),el('p','',ct(s.goal)));head.append(bd,ht);L.appendChild(head);
   if(s.nota){
     const r=el('div','rules');
     [['R','หมุนด้านขวา'],['L','หมุนด้านซ้าย'],['U','หมุนด้านบน'],['D','หมุนด้านล่าง'],['F','หมุนด้านหน้า'],['B','หมุนด้านหลัง'],['R','ตัวอักษรเฉย ๆ คือหมุนตามเข็มนาฬิกา ↻ เมื่อมองตรงไปที่ด้านนั้น'],["R'",'มีขีด (อ่านว่า “ไพรม์”) คือหมุนทวนเข็มนาฬิกา ↺'],['R2','มีเลข 2 คือหมุน 2 ครั้ง']].forEach(([a,b],k)=>{if(k===6)r.appendChild(el('div','',''))&&r.appendChild(el('div','',''));r.append(el('b','',a),el('span','',b));});
@@ -2617,12 +2689,12 @@ function renderLesson(){
     const g=el('div','nota');["R","R'","L","L'","U","U'","D","D'","F","F'","B","B'"].forEach(t=>{const b=el('button','',t);b.type='button';b.onclick=()=>{toTop();loadDemo(`ท่า ${t}`,t,'none',true);};g.appendChild(b);});
     L.appendChild(g);
   }else{
-    const ol=el('ol','how');s.how.forEach(h=>ol.appendChild(el('li','',h)));L.appendChild(ol);
+    const ol=el('ol','how');s.how.forEach(h=>ol.appendChild(el('li','',ct(h))));L.appendChild(ol);
     s.algs.forEach(([a,cap,demoAlg])=>{const box=el('div','algbox');const d=el('div');const c=el('code');c.textContent=a;d.append(c,el('small','',cap));
       const b=el('button','btn primary',ICON.play+'ดู');b.type='button';b.setAttribute('aria-label',`ดูตัวอย่างสูตร ${a}`);
       b.onclick=()=>{toTop();loadDemo(`ขั้น ${s.n}: ${s.t}`,demoAlg,undefined,true);};box.append(d,b);L.appendChild(box);});
   }
-  if(s.tip)L.appendChild(el('p','tip','💡 '+s.tip));
+  if(s.tip)L.appendChild(el('p','tip','💡 '+ct(s.tip)));
   const ft=el('div','lfoot');
   const prev=el('button','btn','ก่อนหน้า');prev.disabled=curStep===0;prev.onclick=()=>goStep(curStep-1);
   const dn=el('button','btn done-btn',prog[curStep]?'✓ ทำได้แล้ว':'ทำได้แล้ว');dn.setAttribute('aria-pressed',!!prog[curStep]);
@@ -2636,7 +2708,7 @@ function renderLesson(){
 function userMove(t){
   if(mode!=='practice')enterPractice();
   enqueue({tok:t,dur:170,before:()=>{if(armed&&!running){running=true;t0=performance.now();elapsed=null;}},after:()=>{history.push(t);
-    if(running&&isSolved()){running=false;armed=false;elapsed=performance.now()-t0;}renderPlayer();}});
+    if(running&&isSolved()){running=false;armed=false;elapsed=performance.now()-t0;recordSolve(elapsed,history.length,false);}renderPlayer();}});
 }
 function enterPractice(){if(mode!=='practice'){history=[];scrambleSeq=[];running=false;elapsed=null;armed=false;stopAll();}clearTimeout(autoTimer);mode='practice';demo=null;renderPlayer();}
 function genScramble(len){
@@ -2707,7 +2779,7 @@ function renderEditor(){
     const i=el('i');i.style.background=COL[f];const c=el('span',n>9?'over':'',`${n}/9`);
     b.append(i,el('span','',NAME[f]),c);b.onclick=()=>{curColor=f;renderEditor();};pal.appendChild(b);}
   const i=WIZ.findIndex(w=>w[0]===curFace);$('#prevFace').disabled=i===0;$('#nextFace').disabled=i===5;
-  renderColorRows();renderPad();
+  renderColorRows();renderPad();if(typeof renderLesson==='function')renderLesson();
 }
 async function paintCell(idx){
   if(mode!=='edit')await enterEdit();
@@ -2741,26 +2813,36 @@ function validate(){
   return errs;
 }
 function showMsg(html){const m=$('#solveMsg');m.innerHTML=html;if(html)m.scrollIntoView({block:'nearest',behavior:reduce?'auto':'smooth'});}
+let solveMethod='lbl';
+function solutionCard(f,live,target){
+  const box=target;
+  const run=()=>{
+    try{
+      let moves,segs=null;
+      if(solveMethod==='lbl'){const r=flatSegs(LBL.solve(f));moves=r.moves;segs=r.segs;}
+      else{if(!solverReady){Cube.initSolver();solverReady=true;}moves=split(Cube.fromString(f).solve());}
+      const raw=solveMethod==='lbl'?LBL.solve(f):null;
+      const body=solveMethod==='lbl'?segHTML(raw):(()=>{const ch=[];for(let i=0;i<moves.length;i+=5)ch.push('<span>'+moves.slice(i,i+5).join(' ')+'</span>');return `<div class="solmoves">${ch.join('')}</div>`;})();
+      box.innerHTML=`<div class="card result"><h2>วิธีแก้ ${moves.length} ท่า</h2>
+        <div class="methods" role="group" aria-label="แบบวิธีแก้"><button data-m="lbl" aria-pressed="${solveMethod==='lbl'}">ตามบทเรียน 7 ขั้น</button><button data-m="short" aria-pressed="${solveMethod==='short'}">สั้นที่สุด</button></div>
+        <p class="muted small" style="margin:4px 0 10px">${solveMethod==='lbl'?'แก้ทีละขั้นด้วยสูตรเดียวกับในบทเรียน ท่าเยอะกว่าแต่เข้าใจได้และฝึกจำได้':'คอมพิวเตอร์คำนวณให้สั้นที่สุด ท่าน้อยแต่จำไม่ได้'}</p>
+        ${body}
+        <p class="muted small" style="margin:10px 0 12px">ถือสี${N.U}ไว้บน สี${N.F}ไว้หน้าตลอด ห้ามหมุนทั้งลูก ${live?'แล้วหมุนลูกจริงตาม แอปจะเลื่อนท่าให้เอง':'แล้วกด <b>ทีละท่า</b> ใต้ลูกบาศก์ หมุนลูกจริงตามทีละท่า'}</p>
+        <button class="btn primary big" data-follow>${ICON.play}เริ่มทำตามทีละท่า</button></div>`;
+      box.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{if(solveMethod===b.dataset.m)return;solveMethod=b.dataset.m;
+        if(solveMethod==='short'&&!solverReady)box.querySelector('.result h2').textContent='กำลังเตรียมตัวคำนวณ อาจใช้เวลา 5–10 วินาที…';setTimeout(run,40);});
+      const title=solveMethod==='lbl'?'วิธีแก้ตามบทเรียน':'วิธีแก้แบบสั้น';
+      if(live){box.querySelector('[data-follow]').onclick=()=>{loadFollow(title,moves,'solution',segs);toTop();};}
+      else{loadDemo(title,moves.join(' '),f,false,'solution',segs);box.querySelector('[data-follow]').onclick=()=>toTop();}
+    }catch(e){box.innerHTML='<div class="errcard"><strong>คำนวณไม่สำเร็จ</strong><p class="small" style="margin:4px 0 0">ลองตรวจสีที่กรอกอีกครั้ง</p></div>';}
+  };
+  box.innerHTML='<div class="infocard">กำลังคำนวณ…</div>';setTimeout(run,40);
+}
 $('#solveBtn').onclick=()=>{
   const errs=validate();
   if(errs.length){showMsg('<div class="errcard"><strong>ยังหาวิธีแก้ไม่ได้</strong><ul>'+errs.map(e=>'<li>'+e+'</li>').join('')+'</ul><p class="small" style="margin:0">ถ้ากรอกถูกหมดแล้วยังขึ้นข้อความนี้ รูบิคอาจเคยถูกแกะแล้วประกอบกลับผิด</p></div>');return;}
-  showMsg(`<div class="infocard">${solverReady?'กำลังคำนวณ…':'กำลังเตรียมตัวคำนวณ ครั้งแรกอาจใช้เวลา 5–10 วินาที'}</div>`);
-  $('#solveBtn').disabled=true;
-  setTimeout(()=>{
-    try{
-      if(!solverReady){Cube.initSolver();solverReady=true;}
-      const s=entry.join(''),sol=Cube.fromString(s).solve().trim(),moves=split(sol);
-      if(!moves.length){showMsg('<div class="infocard"><strong>ลูกนี้เรียงเสร็จอยู่แล้ว</strong></div>');return;}
-      const chunks=[];for(let i=0;i<moves.length;i+=5)chunks.push('<span>'+moves.slice(i,i+5).join(' ')+'</span>');
-      showMsg(`<div class="card result"><h2>วิธีแก้ ${moves.length} ท่า</h2><div class="solmoves">${chunks.join('')}</div>
-        <p class="muted small" style="margin:0 0 12px">ถือสี${N.U}ไว้บน สี${N.F}ไว้หน้าตลอด ห้ามหมุนทั้งลูก แล้วกดปุ่ม <b>ทีละท่า</b> ที่ใต้ลูกบาศก์ หมุนลูกจริงตามทีละท่า</p>
-        <button class="btn primary big" id="follow">${ICON.play}เริ่มทำตามทีละท่า</button>
-        <p class="muted small" style="margin:10px 0 0">วิธีนี้คอมพิวเตอร์คำนวณให้สั้นที่สุด จึงไม่ได้แบ่งตาม 7 ขั้นในบทเรียน</p></div>`);
-      loadDemo(`ทำตามวิธีแก้`,sol,s,false,'solution');
-      $('#follow').onclick=()=>{if(innerWidth<980)scrollTo({top:0,behavior:reduce?'auto':'smooth'});};
-    }catch(e){showMsg('<div class="errcard"><strong>คำนวณไม่สำเร็จ</strong><p class="small" style="margin:4px 0 0">ลองตรวจสีที่กรอกอีกครั้ง</p></div>');}
-    finally{$('#solveBtn').disabled=false;}
-  },60);
+  const f=entry.join('');if(f===SOLVED){showMsg('<div class="infocard"><strong>ลูกนี้เรียงเสร็จอยู่แล้ว</strong></div>');return;}
+  solutionCard(f,false,$('#solveMsg'));$('#solveMsg').scrollIntoView({block:'nearest'});
 };
 
 // ---------- colors & photo ----------
@@ -2820,7 +2902,7 @@ function confirmTap(btn,fn){
 }
 confirmTap($('#resetColors2'),()=>{Object.assign(COL,DEF_COL);Object.assign(NAME,DEF_NAME);saveColors();samples={};cubies.forEach(paint);renderEditor();renderPlayer();showMsg('');toast('คืนค่าสีมาตรฐานแล้ว');});
 confirmTap($('#clearAll2'),async()=>{entry=blankEntry();samples={};overrides.clear();saveEntry();showMsg('');curFace='F';await enterEdit();toast('ล้างสีที่กรอกแล้ว');});
-$('#colorReset').onclick=()=>{Object.assign(COL,DEF_COL);Object.assign(NAME,DEF_NAME);saveColors();cubies.forEach(paint);renderEditor();renderPlayer();};
+$('#colorReset').onclick=()=>{Object.assign(COL,DEF_COL);Object.assign(NAME,DEF_NAME);saveColors();cubies.forEach(paint);renderEditor();renderPlayer();renderLesson();};
 
 const pc=$('#pc'),pIn=$('#photoIn'),sheet=$('#sheet');
 const openSheet=()=>{sheet.hidden=false;document.body.style.overflow='hidden';drawPhoto();$('#pUse').focus();};
@@ -2832,7 +2914,7 @@ function onPick(e){
     img.onload=()=>{const k=Math.min(1,900/Math.max(img.naturalWidth,img.naturalHeight));
       const cv=document.createElement('canvas');cv.width=Math.round(img.naturalWidth*k);cv.height=Math.round(img.naturalHeight*k);
       cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
-      photo={cv,cx:cv.width/2,cy:cv.height/2,s:Math.min(cv.width,cv.height)*.6};$('#psize').value=60;openSheet();};
+      photo={cv,cx:cv.width/2,cy:cv.height/2,s:Math.min(cv.width,cv.height)*.6};$('#psize').value=60;autoFrame();openSheet();};
     img.onerror=()=>showMsg('<div class="errcard"><strong>เปิดรูปนี้ไม่ได้</strong><p class="small" style="margin:4px 0 0">ลองถ่ายใหม่อีกครั้ง</p></div>');
     img.src=rd.result;};
   rd.readAsDataURL(file);
@@ -2859,9 +2941,17 @@ $('#liveShot').onclick=()=>{
   const vw=video.videoWidth,vh=video.videoHeight;if(!vw||!vh)return;
   const k=Math.min(1,900/Math.max(vw,vh)),cv=document.createElement('canvas');cv.width=Math.round(vw*k);cv.height=Math.round(vh*k);
   cv.getContext('2d').drawImage(video,0,0,cv.width,cv.height);stopLive();
-  photo={cv,cx:cv.width/2,cy:cv.height/2,s:Math.min(cv.width,cv.height)*GUIDE};$('#psize').value=Math.round(GUIDE*100);openSheet();
+  photo={cv,cx:cv.width/2,cy:cv.height/2,s:Math.min(cv.width,cv.height)*GUIDE};$('#psize').value=Math.round(GUIDE*100);autoFrame();openSheet();
 };
 addEventListener('resize',sizeGuide);
+function autoFrame(){
+  try{const o=photo.cv,k=160/Math.max(o.width,o.height),w=Math.max(8,Math.round(o.width*k)),h=Math.max(8,Math.round(o.height*k));
+    const t=document.createElement('canvas');t.width=w;t.height=h;const g=t.getContext('2d',{willReadFrequently:true});g.drawImage(o,0,0,w,h);
+    const b=detectCube(g.getImageData(0,0,w,h).data,w,h);
+    if(b&&b.score>30&&b.cellL-b.lineL>35){photo.cx=b.cx/k;photo.cy=b.cy/k;photo.s=b.s/k;$('#psize').value=Math.round(photo.s/Math.min(o.width,o.height)*100);$('#sheetHint').textContent='แอปหากรอบให้อัตโนมัติแล้ว ถ้าไม่ตรงลากปรับได้';return;}
+  }catch(e){}
+  $('#sheetHint').textContent='ลากกรอบให้วงกลมอยู่กลางสติกเกอร์ทุกช่อง';
+}
 function sampleCells(){
   const ctx=photo.cv.getContext('2d',{willReadFrequently:true}),out=[],cell=photo.s/3,half=Math.max(1,cell*.18);
   for(let r=0;r<3;r++)for(let c=0;c<3;c++){
@@ -2906,6 +2996,149 @@ $('#pUse').onclick=async()=>{
   showMsg(`<div class="infocard">อ่านสี${done}แล้ว ตรวจในตารางว่าตรงกับลูกจริงไหม ถ้าช่องไหนผิด เลือกสีแล้วแตะแก้ได้${left?` จากนั้นกด “ด้านถัดไป” (เหลืออีก ${left} ด้าน) สีที่ยังไม่ได้ถ่ายด้านของมันอาจอ่านเพี้ยนไปก่อน ถ่ายครบ 6 ด้านแล้วแอปจะอ่านใหม่ให้เอง`:' ครบ 6 ด้านแล้ว กด “หาวิธีแก้” ได้เลย'}</div>`);
 };
 addEventListener('resize',()=>drawPhoto());
+
+// ---------- beginner solver & photo detection ----------
+// Layer-by-layer (beginner) solver matching the app's 7 lesson steps. White = D, yellow = U.
+const LBL=(()=>{
+  const FACES='URFDLB';let MV=null,CT=null;
+  function init(){
+    if(MV)return;MV={};
+    for(const f of FACES){const c=new Cube();c.move(f);const m={cp:c.cp.slice(),co:c.co.slice(),ep:c.ep.slice(),eo:c.eo.slice()};
+      MV[f]=m;MV[f+'2']=mul(m,m);MV[f+"'"]=mul(MV[f+'2'],m);}
+    // cross pruning table over edges 4..7 (DR,DF,DL,DB)
+    const N=12**4*16;CT=new Uint8Array(N).fill(255);
+    const inv={};for(const k in MV){const p=MV[k].ep,ip=[];for(let i=0;i<12;i++)ip[p[i]]=i;inv[k]=ip;}
+    const enc=(pos,ori)=>((((pos[0]*12+pos[1])*12+pos[2])*12+pos[3])*16)+((ori[0])|(ori[1]<<1)|(ori[2]<<2)|(ori[3]<<3));
+    let frontier=[[[4,5,6,7],[0,0,0,0]]];CT[enc([4,5,6,7],[0,0,0,0])]=0;let d=0;
+    const keys=Object.keys(MV);
+    while(frontier.length){const next=[];d++;
+      for(const[pos,ori]of frontier)for(const k of keys){const m=MV[k],ip=inv[k];
+        const np=[],no=[];for(let j=0;j<4;j++){const i=ip[pos[j]];np.push(i);no.push((ori[j]+m.eo[i])&1);}
+        const e=enc(np,no);if(CT[e]===255){CT[e]=d;next.push([np,no]);}}
+      frontier=next;}
+    init.enc=enc;init.inv=inv;
+  }
+  function mul(a,m){const r={cp:[],co:[],ep:[],eo:[]};
+    for(let i=0;i<8;i++){r.cp[i]=a.cp[m.cp[i]];r.co[i]=(a.co[m.cp[i]]+m.co[i])%3;}
+    for(let i=0;i<12;i++){r.ep[i]=a.ep[m.ep[i]];r.eo[i]=(a.eo[m.ep[i]]+m.eo[i])&1;}return r;}
+  const run=(s,moves)=>{for(const m of moves)s=mul(s,MV[m]);return s;};
+  const sp=a=>a.trim().split(/\s+/).filter(Boolean);
+  // frames: hold face X in front (U stays up)
+  const RIGHT={F:'R',R:'B',B:'L',L:'F'},OPP={F:'B',B:'F',R:'L',L:'R'};
+  function frame(alg,front){const m={F:front,R:RIGHT[front],B:OPP[front],L:OPP[RIGHT[front]],U:'U',D:'D'};return sp(alg).map(t=>m[t[0]]+t.slice(1));}
+  const FR=['F','R','B','L'];
+  const edgeOK=(s,i)=>s.ep[i]===i&&s.eo[i]===0, cornOK=(s,i)=>s.cp[i]===i&&s.co[i]===0;
+  const cross=s=>[4,5,6,7].every(i=>edgeOK(s,i));
+  const corners=s=>[4,5,6,7].every(i=>cornOK(s,i));
+  const mids=s=>[8,9,10,11].every(i=>edgeOK(s,i));
+  const yCross=s=>[0,1,2,3].every(i=>s.eo[i]===0);
+  const aufs=['','U','U2',"U'"];
+  function withAUF(s,pred){for(const a of aufs){const t=a?run(s,[a]):s;if(pred(t))return a;}return null;}
+  const yEdges=s=>[0,1,2,3].every(i=>s.ep[i]===i);
+  const yCornPos=s=>[0,1,2,3].every(i=>s.cp[i]===i);
+  function stageOf(f){init();const s=Cube.fromString(f);const st={cp:s.cp,co:s.co,ep:s.ep,eo:s.eo};
+    if(!cross(st))return 0;if(!corners(st))return 1;if(!mids(st))return 2;if(!yCross(st))return 3;
+    if(withAUF(st,yEdges)===null)return 4;const a=withAUF(st,yEdges);const t=a?run(st,[a]):st;
+    if(!yCornPos(t))return 5;if(!(t.co.every(x=>x===0)&&yEdges(t)&&yCornPos(t)))return 6;
+    return 7;}
+  function bfs(s,tokens,goal,maxD){
+    if(goal(s))return[];let fr=[[s,[]]];
+    for(let d=1;d<=maxD;d++){const nx=[];
+      for(const[st,path]of fr)for(const t of tokens){const last=path[path.length-1];if(last&&last.u&&t.u)continue;
+        const ns=run(st,t.m),np=path.concat([t]);if(goal(ns))return np;nx.push([ns,np]);}
+      fr=nx;}
+    return null;}
+  function solveCross(s){
+    const enc=init.enc,inv=init.inv;
+    const key=st=>{const pos=[],ori=[];for(let j=4;j<8;j++){const i=st.ep.indexOf(j);pos.push(i);ori.push(st.eo[i]);}return enc(pos,ori);};
+    const out=[];let cur=s;
+    while(CT[key(cur)]>0){const h=CT[key(cur)];let found=false;
+      for(const k in MV){const ns=mul(cur,MV[k]);if(CT[key(ns)]===h-1){out.push(k);cur=ns;found=true;break;}}
+      if(!found)break;}
+    return{moves:out,s:cur};}
+  function simplify(m){const out=[];const val=t=>t.endsWith('2')?2:t.endsWith("'")?3:1;
+    for(const t of m){const l=out[out.length-1];if(l&&l[0]===t[0]){const v=(val(l)+val(t))%4;out.pop();if(v)out.push(t[0]+['','','2',"'"][v]);}else out.push(t);}
+    return out;}
+  function solve(facelet){
+    init();const c=Cube.fromString(facelet);let s={cp:c.cp,co:c.co,ep:c.ep,eo:c.eo};const segs=[];
+    const push=(step,title,note,moves)=>{moves=simplify(moves);if(moves.length)segs.push({step,title,note,moves});s=run(s,moves);};
+    // 1 cross
+    const cr=solveCross(s);push(1,'กากบาท','ทำกากบาทด้านล่าง',cr.moves);
+    // 2 corners: slot pos -> front frame; top above
+    const SLOT={4:'F',7:'R',6:'B',5:'L'},ABOVE={4:0,7:3,6:2,5:1},TOPF={0:'F',3:'R',2:'B',1:'L'},BOTF={4:'F',7:'R',6:'B',5:'L'};
+    for(const j of [4,7,6,5]){
+      if(cornOK(s,j))continue;let mv=[];let p=s.cp.indexOf(j);
+      if(p>=4){mv=mv.concat(frame("R U R' U'",BOTF[p]));s=run(s,frame("R U R' U'",BOTF[p]));p=s.cp.indexOf(j);}
+      const setup=[];for(const a of aufs){const t=a?run(s,[a]):s;if(t.cp.indexOf(j)===ABOVE[j]){if(a)setup.push(a);break;}}
+      s=run(s,setup);mv=mv.concat(setup);
+      const sx=frame("R U R' U'",SLOT[j]);let n=0;while(!cornOK(s,j)&&n<6){s=run(s,sx);mv=mv.concat(sx);n++;}
+      s=run(s,invert(mv));// rewind, then push as one segment
+      push(2,'มุมสีล่าง',`ใส่มุมด้วย R U R' U' (หันช่องเป้าหมายไว้หน้า-ขวา)`,mv);
+    }
+    // 3 middle edges
+    const RA="U R U' R' U' F' U F",LA="U' L' U L U F U' F'",EF={8:'F',11:'R',10:'B',9:'L'};
+    const done=()=>cross(s)&&corners(s);
+    for(const j of [8,11,10,9]){
+      if(edgeOK(s,j))continue;let mv=[];let p=s.ep.indexOf(j);
+      if(p>=8){const x=frame(RA,EF[p]);mv=mv.concat(x);s=run(s,x);}
+      let ok=null;
+      for(const a of aufs){for(const f of FR)for(const[alg,nm]of[[RA,'ไปขวา'],[LA,'ไปซ้าย']]){const cand=(a?[a]:[]).concat(frame(alg,f));const t=run(s,cand);
+        if(edgeOK(t,j)&&[4,5,6,7].every(i=>edgeOK(t,i)&&cornOK(t,i))&&[8,9,10,11].filter(i=>i!==j&&edgeOK(s,i)).every(i=>edgeOK(t,i))){ok={cand,nm};break;}}if(ok)break;}
+      if(!ok)throw new Error('mid');
+      s=run(s,ok.cand);mv=mv.concat(ok.cand);s=run(s,invert(mv));
+      push(3,'ชั้นกลาง',`ใส่ขอบด้วยสูตร${ok.nm}`,mv);
+    }
+    // 4 yellow cross
+    const T=a=>({m:sp(a),u:a.startsWith('U')&&sp(a).length===1});
+    const uT=['U','U2',"U'"].map(T);
+    let r=bfs(s,uT.concat([T("F R U R' U' F'")]),yCross,8);push(4,'กากบาทบน',"ใช้ F R U R' U' F'",[].concat(...r.map(t=>t.m)));
+    // 5 yellow edges
+    r=bfs(s,uT.concat(FR.map(f=>({m:frame("R U R' U R U2 R' U",f),u:false}))),yEdges,5);push(5,'ขอบบนตรงสี',"ใช้ R U R' U R U2 R' U",[].concat(...r.map(t=>t.m)));
+    // 6 corner positions
+    r=bfs(s,FR.map(f=>({m:frame("U R U' L' U R' U' L",f),u:false})),yCornPos,3);push(6,'วางมุมบน',"ใช้ U R U' L' U R' U' L",[].concat(...r.map(t=>t.m)));
+    // 7 orient corners: only U turns between
+    let mv=[];for(let k=0;k<4;k++){let n=0;while(s.co[0]!==0&&n<3){const x=sp("R' D' R D R' D' R D");s=run(s,x);mv=mv.concat(x);n++;}s=run(s,['U']);mv.push('U');}
+    s=run(s,invert(mv));
+    const fin=withAUF(run(s,mv),st=>st.cp.every((x,i)=>x===i)&&st.ep.every((x,i)=>x===i)&&st.co.every(x=>!x)&&st.eo.every(x=>!x));
+    if(fin)mv.push(fin);push(7,'หมุนมุมบน',"ใช้ R' D' R D ซ้ำ หมุนแค่ U ระหว่างมุม",mv);
+    const solvedNow=s.cp.every((x,i)=>x===i)&&s.ep.every((x,i)=>x===i)&&s.co.every(x=>!x)&&s.eo.every(x=>!x);
+    if(!solvedNow)throw new Error('not solved');
+    return segs;
+  }
+  const inv1=t=>t.endsWith('2')?t:t.endsWith("'")?t[0]:t+"'";
+  const invert=a=>a.slice().reverse().map(inv1);
+  return{solve,stageOf,init};
+})();
+
+
+function detectCube(px,W,H){ // px: RGB(A) array with stride 4
+  const L=new Float32Array(W*H),R=new Float32Array(W*H),G=new Float32Array(W*H),B=new Float32Array(W*H);
+  for(let i=0;i<W*H;i++){R[i]=px[i*4];G[i]=px[i*4+1];B[i]=px[i*4+2];L[i]=(R[i]*.299+G[i]*.587+B[i]*.114);}
+  // integral images for mean & variance
+  const mk=a=>{const I=new Float64Array((W+1)*(H+1));for(let y=0;y<H;y++){let row=0;for(let x=0;x<W;x++){row+=a[y*W+x];I[(y+1)*(W+1)+x+1]=I[y*(W+1)+x+1]+row;}}return I;};
+  const sq=a=>a.map(v=>v*v);
+  const IR=mk(R),IG=mk(G),IB=mk(B),IL=mk(L),IR2=mk(sq(R)),IG2=mk(sq(G)),IB2=mk(sq(B));
+  const box=(I,x0,y0,x1,y1)=>I[y1*(W+1)+x1]-I[y0*(W+1)+x1]-I[y1*(W+1)+x0]+I[y0*(W+1)+x0];
+  const stat=(cx,cy,h)=>{const x0=Math.max(0,Math.round(cx-h)),y0=Math.max(0,Math.round(cy-h)),x1=Math.min(W,Math.round(cx+h)+1),y1=Math.min(H,Math.round(cy+h)+1);const n=Math.max(1,(x1-x0)*(y1-y0));
+    const mr=box(IR,x0,y0,x1,y1)/n,mg=box(IG,x0,y0,x1,y1)/n,mb=box(IB,x0,y0,x1,y1)/n;
+    const v=box(IR2,x0,y0,x1,y1)/n-mr*mr+box(IG2,x0,y0,x1,y1)/n-mg*mg+box(IB2,x0,y0,x1,y1)/n-mb*mb;
+    return{l:box(IL,x0,y0,x1,y1)/n,sd:Math.sqrt(Math.max(0,v))};};
+  const lum=(x,y)=>{x=Math.round(x);y=Math.round(y);if(x<0||y<0||x>=W||y>=H)return 255;return L[y*W+x];};
+  let best=null;const mn=Math.min(W,H);
+  for(let s=mn*.25;s<=mn*.98;s*=1.04){const c=s/3,h=Math.max(1,c*.2);
+    for(let cy=s/2;cy<=H-s/2;cy+=Math.max(1,s/40))for(let cx=s/2;cx<=W-s/2;cx+=Math.max(1,s/40)){
+      let sdSum=0,minL=999,cells=[];
+      for(let r=-1;r<=1;r++)for(let q=-1;q<=1;q++){const st=stat(cx+q*c,cy+r*c,h);sdSum+=st.sd;cells.push(st.l);if(st.l<minL)minL=st.l;}
+      // grid lines: midpoints between neighbouring cells
+      let lineL=0,n=0;
+      for(let r=-1;r<=1;r++)for(let q=-1;q<=0;q++){lineL+=lum(cx+(q+.5)*c,cy+r*c);n++;lineL+=lum(cx+r*c,cy+(q+.5)*c);n++;}
+      lineL/=n;const cellL=cells.reduce((a,b)=>a+b,0)/9;
+      const score=(cellL-lineL)-sdSum/9*0.8;
+      if(!best||score>best.score)best={score,cx,cy,s,cellL,lineL,sd:sdSum/9};
+    }}
+  return best;
+}
+
 
 // ---------- bluetooth (GiiKER / Mi Smart cube) ----------
 const GK={
@@ -2971,7 +3204,11 @@ async function btConnect(){
     try{const rw=await g.getPrimaryService(BT_RW);const r=await rw.getCharacteristic(BT_R);bt.w=await rw.getCharacteristic(BT_W);
       r.addEventListener('characteristicvaluechanged',e=>{const v=e.target.value;if(v&&v.byteLength>1){bt.battery=clamp(v.getUint8(1),0,100);btUI();}});
       await r.startNotifications();btWrite(0xb5);clearInterval(bt.timer);bt.timer=setInterval(()=>btWrite(0xb5),60000);}catch(e){bt.w=null;}
-    btUI();closeBt();toast('เชื่อมลูกแล้ว หมุนลูกจริงได้เลย');
+    btUI();
+    let calDone=false;try{calDone=!!localStorage.getItem('rubik-bt-cal');}catch(e){}
+    if(!calDone){$('#btOff').hidden=true;$('#btOnView').hidden=false;startCal();toast('เชื่อมแล้ว มาตั้งสีลูกนี้กันก่อน');}
+    else{closeBt();toast('เชื่อมลูกแล้ว หมุนลูกจริงได้เลย');}
+    lastStage=null;setTimeout(()=>updateCoach(false),50);
     if(curTab==='practice')goLive('practice');else{selectTab(curTab==='learn'?'solve':curTab);}
   }catch(e){btError('connect');try{dev.gatt.disconnect();}catch(_){}btUI();}
 }
@@ -2986,13 +3223,15 @@ function onBtData(dv){
   const prev=bt.facelet;bt.facelet=r.facelet;
   let mv=null;try{if(r.move&&prev&&after(prev,r.move)===r.facelet)mv=r.move;}catch(e){}
   if(mv){bt.moves.push(mv);if(bt.moves.length>300)bt.moves.shift();}
+  if(cal.step&&mv)calMove(mv);
+  if(curTab==='learn')updateCoach(true);
   const liveDemo=mode==='demo'&&demo&&demo.live;
   if(!(mode==='live'||mode==='practice'||liveDemo))return;
   mirror(r.facelet,mv);
   if(mode==='practice'){
     if(mv)history.push(mv);
     if(armed&&!running&&mv){running=true;t0=performance.now();elapsed=null;}
-    if(running&&r.facelet===SOLVED){running=false;armed=false;elapsed=performance.now()-t0;}
+    if(running&&r.facelet===SOLVED){running=false;armed=false;elapsed=performance.now()-t0;recordSolve(elapsed,history.length,true);}
   }else if(liveDemo)followUpdate(r.facelet);
   renderPlayer();
 }
@@ -3008,13 +3247,13 @@ async function goLive(m){
   if(m==='practice'){history=[];scrambleSeq=[];running=false;elapsed=null;armed=false;}
   vx=-28;vy=-38;setView();renderPlayer();
 }
-async function loadFollow(title,moves,kind){
+async function loadFollow(title,moves,kind,segs){
   await goLive(kind==='scramble'?'practice':'live');
   const states=[bt.facelet],halves=[];let c=Cube.fromString(bt.facelet);
   for(const m of moves){
     if(m.endsWith('2')){const s=c.asString();halves.push([after(s,m[0]),after(s,m[0]+"'")]);}else halves.push([]);
     c.move(m);states.push(c.asString());}
-  mode='demo';demo={title,moves,i:0,now:null,kind,live:true,states,halves,half:false,off:false};
+  mode='demo';demo={title,moves,i:0,now:null,kind,live:true,states,halves,half:false,off:false,segs};
   if(kind==='scramble')scrambleSeq=moves;
   renderPlayer();
 }
@@ -3025,6 +3264,7 @@ function followUpdate(f){
   else{d.off=true;d.half=false;}
   if(d.i>=d.moves.length){
     if(d.kind==='scramble'){mode='practice';demo=null;history=[];running=false;elapsed=null;armed=true;toast('สุ่มเสร็จแล้ว หมุนท่าแรกเพื่อเริ่มจับเวลา');}
+    else if(d.kind==='hint'){toast(`ทำขั้น ${d.hintStep} เสร็จแล้ว!`);goLive('live');}
     else toast('เรียงเสร็จแล้ว เก่งมาก!');
   }
 }
@@ -3032,14 +3272,78 @@ function btScramble(){if(!bt.on)return;loadFollow('หมุนลูกจร�
 function btSolve(){
   if(!bt.on)return;const m=$('#btSolveMsg');
   if(bt.facelet===SOLVED){m.innerHTML='<div class="infocard">ลูกเรียงอยู่แล้ว ลองหมุนให้มั่วก่อน แล้วกดอีกครั้ง</div>';return;}
-  m.innerHTML=`<div class="infocard">${solverReady?'กำลังคำนวณ…':'กำลังเตรียมตัวคำนวณ ครั้งแรกอาจใช้เวลา 5–10 วินาที'}</div>`;
-  setTimeout(()=>{
-    try{if(!solverReady){Cube.initSolver();solverReady=true;}
-      const moves=split(Cube.fromString(bt.facelet).solve());m.innerHTML='';
-      loadFollow(`ทำตามวิธีแก้ (${moves.length} ท่า)`,moves,'solution');toTop();}
-    catch(e){m.innerHTML='<div class="errcard"><strong>คำนวณไม่สำเร็จ</strong><p class="small" style="margin:4px 0 0">ลองกดตั้งให้ลูกเป็นลูกที่เรียงแล้วหลังเรียงลูกจริงเสร็จ แล้วลองใหม่</p></div>';}
-  },60);
+  solutionCard(bt.facelet,true,m);
 }
+// ---- calibration (orientation + colours) ----
+const SCHEMES={pastel:{up:['#F2F4F7','ขาว'],down:['#F2E400','เหลือง'],front:['#6FD3BE','มิ้นท์'],back:['#1E6FD9','น้ำเงิน'],right:['#E996C8','ชมพู'],left:['#EE5A1F','ส้ม']},
+  std:{up:['#F4F6F8','ขาว'],down:['#FFD500','เหลือง'],front:['#009E60','เขียว'],back:['#0051BA','น้ำเงิน'],right:['#C41E3A','แดง'],left:['#FF5800','ส้ม']}};
+const cal={step:0,scheme:'pastel',u:null};
+const letterOf=n=>Object.keys(FACE).find(f=>FACE[f].every((v,i)=>v===n[i]));
+function startCal(){cal.step=0;$('#calBox').hidden=false;$('#calPick').hidden=false;$('#calStep').hidden=true;$('#btCalStart').hidden=true;}
+function calShow(t,sub){$('#calPick').hidden=true;$('#calStep').hidden=false;$('#calText').textContent=t;$('#calSub').textContent=sub||'';}
+document.querySelectorAll('[data-scheme]').forEach(b=>b.onclick=()=>{cal.scheme=b.dataset.scheme;cal.step=1;const S=SCHEMES[cal.scheme];
+  calShow(`1. ถือลูกให้กลางสี${S.up[1]}อยู่บน กลางสี${S.front[1]}หันเข้าหาตัว แล้วหมุนด้านบน 1 ครั้ง`,'หมุนทางไหนก็ได้');});
+function calMove(mv){
+  const f=mv[0],S=SCHEMES[cal.scheme];
+  if(cal.step===1){cal.u=f;cal.step=2;calShow(`2. ถือลูกท่าเดิม แล้วหมุนด้านหน้า (กลางสี${S.front[1]}) 1 ครั้ง`,'ด้านที่หันเข้าหาตัว');return;}
+  if(cal.step===2){
+    const nu=FACE[cal.u],nf=FACE[f];
+    if(nu[0]*nf[0]+nu[1]*nf[1]+nu[2]*nf[2]!==0){cal.step=1;calShow(`หมุนด้านเดิมหรือด้านตรงข้าม ลองใหม่: ถือกลางสี${S.up[1]}ไว้บน กลางสี${S.front[1]}หันหาตัว แล้วหมุนด้านบน 1 ครั้ง`);return;}
+    const nr=[nu[1]*nf[2]-nu[2]*nf[1],nu[2]*nf[0]-nu[0]*nf[2],nu[0]*nf[1]-nu[1]*nf[0]],neg=v=>v.map(x=>-x);
+    const map={[cal.u]:S.up,[letterOf(neg(nu))]:S.down,[f]:S.front,[letterOf(neg(nf))]:S.back,[letterOf(nr)]:S.right,[letterOf(neg(nr))]:S.left};
+    for(const k in map){COL[k]=map[k][0];NAME[k]=map[k][1];}
+    saveColors();try{localStorage.setItem('rubik-bt-cal','1');}catch(e){}
+    cal.step=0;cubies.forEach(paint);renderEditor();renderLesson();renderPad();renderPlayer();
+    calShow('ตั้งค่าเสร็จแล้ว ✓',`ต่อไปให้ถือลูกแบบนี้เสมอ: กลางสี${N.U}อยู่บน กลางสี${N.F}หันหาตัว`);
+    $('#btCalStart').hidden=false;$('#btCalStart').textContent='ตั้งสีและทิศทางใหม่';
+    toast(`ถือกลางสี${N.U}ไว้บน สี${N.F}หันหาตัว`);
+  }
+}
+$('#btCalStart').onclick=startCal;
+
+// ---- BT coach for lessons ----
+let lastStage=null,coachBusy=false;
+function updateCoach(fromMove){
+  if(!bt.on||!bt.facelet)return;
+  const txt=$('#coachText');
+  if(!LBL._ready){if(coachBusy)return;coachBusy=true;txt.textContent='กำลังวิเคราะห์ลูก…';setTimeout(()=>{LBL.init();LBL._ready=true;coachBusy=false;updateCoach(false);},30);return;}
+  const st=LBL.stageOf(bt.facelet);
+  [...$('#coachBar').children].forEach((e,i)=>e.classList.toggle('on',i<st));
+  $('#coachSub').textContent=`ถือกลางสี${N.U}ไว้บน สี${N.F}หันหาตัว`;
+  if(st===7)txt.innerHTML='<b>ลูกเรียงครบแล้ว</b> ลองหมุนให้มั่ว แล้วเริ่มขั้น 1 ใหม่';
+  else txt.innerHTML=(st?`ทำเสร็จถึง <b>ขั้น ${st}</b> แล้ว `:'')+`ต่อไป: <b>ขั้น ${st+1} ${ct(STEPS[st+1].t)}</b>`;
+  $('#coachGo').textContent=st===7?'ไปบทเรียน':`ไปบทเรียนขั้น ${st+1}`;$('#coachGo').onclick=()=>goStep(st===7?1:st+1);
+  $('#coachHint').disabled=st===7;
+  if(fromMove&&lastStage!=null&&st>lastStage){let n=0;for(let i=lastStage+1;i<=st;i++)if(!prog[i]){prog[i]=true;n++;}
+    saveProg();renderLesson();toast(st===7?'เรียงเสร็จทั้งลูก เก่งมาก!':`ทำขั้น ${st} สำเร็จ!${n?' ติ๊กให้แล้ว':''}`);}
+  lastStage=st;
+}
+function coachHint(){
+  if(!bt.on)return;if(!LBL._ready){LBL.init();LBL._ready=true;}
+  const st=LBL.stageOf(bt.facelet);if(st===7)return;
+  const segs=LBL.solve(bt.facelet).filter(g=>g.step===st+1);if(!segs.length)return;
+  const r=flatSegs(segs);loadFollow(`ใบ้ขั้น ${st+1}`,r.moves,'hint',r.segs).then(()=>{demo.hintStep=st+1;});toTop();
+}
+$('#coachHint').onclick=coachHint;$('#coachShow').onclick=()=>{goLive('live');toTop();};
+
+// ---- time stats ----
+let times=[];try{times=JSON.parse(localStorage.getItem('rubik-times')||'[]')||[];}catch(e){}
+function recordSolve(ms,moves,real){if(!scrambleSeq.length&&!real)return;times.push({t:Math.round(ms),m:moves,d:Date.now(),bt:!!real});if(times.length>500)times.shift();
+  try{localStorage.setItem('rubik-times',JSON.stringify(times));}catch(e){}renderStats();}
+function aoN(n){if(times.length<n)return null;const a=times.slice(-n).map(x=>x.t).sort((x,y)=>x-y);a.shift();a.pop();return a.reduce((x,y)=>x+y,0)/a.length;}
+function renderStats(){
+  const st=$('#stats'),best=times.length?Math.min(...times.map(x=>x.t)):null,f=v=>v==null?'–':fmt(v);
+  st.innerHTML=[['ดีที่สุด',f(best)],['ao5',f(aoN(5))],['ao12',f(aoN(12))],['ครั้ง',times.length]].map(([a,b])=>`<div><b>${b}</b><small>${a}</small></div>`).join('');
+  const sp=$('#spark'),last=times.slice(-30);
+  if(last.length>1){const mx=Math.max(...last.map(x=>x.t)),mn=Math.min(...last.map(x=>x.t)),rg=Math.max(1,mx-mn);
+    const pts=last.map((x,i)=>`${(i/(last.length-1)*296+2).toFixed(1)},${(52-(x.t-mn)/rg*48).toFixed(1)}`).join(' ');
+    sp.innerHTML=`<polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`;}else sp.innerHTML='';
+  sp.style.display=last.length>1?'':'none';
+  $('#tlist').innerHTML=times.slice(-10).reverse().map(x=>`<li class="${x.t===best?'best':''}"><span>${new Date(x.d).toLocaleDateString('th-TH',{day:'numeric',month:'short'})}${x.bt?' · ลูกจริง':''}</span><b>${fmt(x.t)}</b></li>`).join('')||'<li style="grid-column:1/-1;border:0" class="muted">ยังไม่มีประวัติ ลองสุ่มโจทย์แล้วเรียงให้เสร็จ</li>';
+}
+confirmTap($('#clearTimes'),()=>{times=[];try{localStorage.setItem('rubik-times','[]');}catch(e){}renderStats();});
+renderStats();
+
 const btSheet=$('#btSheet');
 function openBt(){$('#btMsg').innerHTML='';btUI();btSheet.hidden=false;document.body.style.overflow='hidden';}
 function closeBt(){btSheet.hidden=true;document.body.style.overflow='';}
@@ -3060,6 +3364,7 @@ function selectTab(name){
   if(name==='practice'){if(bt.on){if(!(mode==='demo'&&demo&&demo.live&&demo.kind==='scramble'))goLive('practice');}else enterPractice();}
   if(name==='solve'&&!(mode==='demo'&&demo&&demo.kind==='solution')){if(bt.on)goLive('live');else enterEdit();}
   if(name!=='solve')renderPad();
+  if(name==='learn')updateCoach(false);
   scrollTo({top:0});
 }
 $('#navLearn').onclick=()=>selectTab('learn');
@@ -3075,6 +3380,11 @@ $('#resetView').onclick=()=>{vx=-28;vy=-38;setView();};
 
 let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(async()=>{await idle();layout();},120);});
 build();setView();renderLesson();renderPad();renderPlayer();
+// offline / install support when self-hosted (e.g. GitHub Pages)
+if(location.protocol==='https:'&&!/claude|anthropic/.test(location.hostname)){
+  try{const l=document.createElement('link');l.rel='manifest';l.href='manifest.webmanifest';document.head.appendChild(l);
+    if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});}catch(e){}
+}
 })();
 </script>
 </body>
