@@ -1,6 +1,6 @@
 (() => {
 const $=s=>document.querySelector(s);
-const APP_VER='7';
+const APP_VER='8';
 const FACE={U:[0,1,0],D:[0,-1,0],R:[1,0,0],L:[-1,0,0],F:[0,0,1],B:[0,0,-1]};
 const DEF_COL={U:'#FFD500',D:'#F4F6F8',F:'#009E60',B:'#0051BA',R:'#FF5800',L:'#C41E3A'};
 const DEF_NAME={U:'เหลือง',D:'ขาว',F:'เขียว',B:'น้ำเงิน',R:'ส้ม',L:'แดง'};
@@ -800,7 +800,8 @@ function btUI(){
   $('#btPill').classList.toggle('on',bt.on);
   $('#btPillText').textContent=bt.on?(bt.battery!=null?`${bt.battery}%`:'เชื่อมแล้ว'):'เชื่อมลูกบลูทูธ';
   $('#btOff').hidden=bt.on;$('#btOnView').hidden=!bt.on;
-  $('#btName').textContent=bt.name;$('#btBatt').textContent=bt.battery!=null?`แบตเตอรี่ ${bt.battery}%`:'เชื่อมต่ออยู่';
+  $('#btName').textContent=bt.name+(bt.on&&bt.mode==='moves'?' · โหมดนับท่า':'');$('#btBatt').textContent=bt.battery!=null?`แบตเตอรี่ ${bt.battery}%`:'เชื่อมต่ออยู่';
+  const mn=$('#btModeNote');if(mn)mn.hidden=!(bt.on&&bt.mode==='moves');
   const go=$('#btGo');go.textContent=bt.on?'ยกเลิกการเชื่อม':'เชื่อมต่อ';go.className=bt.on?'btn':'btn primary';go.disabled=false;
 }
 function btError(kind){
@@ -821,9 +822,11 @@ async function setupGatt(dev){
   const c=await (await g.getPrimaryService(BT_DATA)).getCharacteristic(BT_DATA_C);
   if(c.removeEventListener)c.removeEventListener('characteristicvaluechanged',onBtChar);c.addEventListener('characteristicvaluechanged',onBtChar);
   await c.startNotifications();
-  const fv=await c.readValue();const first=GK.parse(fv);try{logBt(fv,first,'',null);}catch(e){}
+  const fv=await c.readValue();const first=GK.parse(fv);bt.lastHex=hexOf(fv);try{logBt(fv,first,'',null);}catch(e){}
   let X=null;try{const o=localStorage.getItem('rubik-bt-offset');if(o)X=Cube.fromString(o);}catch(e){}
-  Object.assign(bt,{on:true,dev,raw:first.facelet,name:dev.name||'GiiKER',manual:false});setOffset(X);bt.facelet=tracked(bt.raw);
+  Object.assign(bt,{on:true,dev,raw:first.facelet,name:dev.name||'GiiKER',manual:false});setOffset(X);
+  if(checkFacelet(first.facelet)){bt.mode='moves';let last=null;try{last=localStorage.getItem('rubik-bt-last');}catch(e){}bt.facelet=last&&!checkFacelet(last)?last:SOLVED;}
+  else{bt.mode='state';bt.facelet=tracked(bt.raw);}
   try{const rw=await g.getPrimaryService(BT_RW);const r=await rw.getCharacteristic(BT_R);bt.w=await rw.getCharacteristic(BT_W);
     if(r.removeEventListener)r.removeEventListener('characteristicvaluechanged',onBtBatt);r.addEventListener('characteristicvaluechanged',onBtBatt);
     await r.startNotifications();btWrite(0xb5);clearInterval(bt.timer);bt.timer=setInterval(()=>btWrite(0xb5),60000);}catch(e){bt.w=null;}
@@ -865,14 +868,24 @@ function onBtDisconnect(){
   if(!bt.manual&&bt.dev){toast('ลูกหลุด กำลังเชื่อมใหม่…');btReconnect(bt.dev);}else toast('ยกเลิกการเชื่อมลูกแล้ว');
 }
 function onBtData(dv){
-  const r=GK.parse(dv);if(!bt.on||r.facelet===bt.raw)return;
-  const prev=bt.facelet;bt.raw=r.facelet;let cur;try{cur=tracked(r.facelet);}catch(e){cur=r.facelet;}
+  const hx=hexOf(dv);if(!bt.on||hx===bt.lastHex)return;bt.lastHex=hx;
+  const r=GK.parse(dv);if(r.facelet===bt.raw&&!checkFacelet(r.facelet))return;
+  const raw=r.facelet,rawBad=!!checkFacelet(raw),prev=bt.facelet;bt.raw=raw;
+  let cur=null,mv=null;
+  if(!rawBad){
+    try{cur=tracked(raw);}catch(e){cur=raw;}
+    if(prev){const cands=(r.move?[r.move]:[]).concat(ALL_MOVES);
+      for(const m of cands){try{if(after(prev,m)===cur){mv=m;break;}}catch(e){}}}
+  }else if(r.move&&prev&&!checkFacelet(prev)){
+    // cube sends a state we cannot read: follow the reported move instead
+    try{cur=after(prev,r.move);mv=r.move;}catch(e){}
+  }
+  if(bt.mode!==(rawBad?'moves':'state')){bt.mode=rawBad?'moves':'state';btUI();}
+  logBt(dv,{facelet:raw,move:r.move},cur||'',mv);
+  if(!cur)return;
   bt.facelet=cur;r.facelet=cur;
-  let mv=null;
-  if(prev){const cands=(r.move?[r.move]:[]).concat(ALL_MOVES);
-    for(const m of cands){try{if(after(prev,m)===cur){mv=m;break;}}catch(e){}}}
-  logBt(dv,r,cur,mv);
-  if(bt.X&&cur===SOLVED){btWrite(0xa1);bt.raw=SOLVED;setOffset(null);setTimeout(()=>toast('เรียงเสร็จ แก้ความจำในลูกให้ตรงแล้ว'),400);}
+  if(bt.mode==='moves'){try{localStorage.setItem('rubik-bt-last',cur);}catch(e){}}
+  if(bt.mode==='state'&&bt.X&&cur===SOLVED){btWrite(0xa1);bt.raw=SOLVED;setOffset(null);setTimeout(()=>toast('เรียงเสร็จ แก้ความจำในลูกให้ตรงแล้ว'),400);}
   if(mv){bt.moves.push(mv);if(bt.moves.length>300)bt.moves.shift();}
   if(cal.step&&mv)calMove(mv);
   if(curTab==='learn')updateCoach(true);
@@ -1015,7 +1028,7 @@ function closeBt(){btSheet.hidden=true;document.body.style.overflow='';}
 $('#btPill').onclick=openBt;$('#btClose').onclick=closeBt;
 btSheet.addEventListener('click',e=>{if(e.target===btSheet)closeBt();});
 $('#btGo').onclick=()=>{if(bt.on){bt.manual=true;const d=bt.dev;onBtDisconnect();try{d.gatt.disconnect();}catch(e){}closeBt();}else btConnect();};
-$('#btReset').onclick=()=>{if(!bt.on)return;btWrite(0xa1);bt.raw=SOLVED;setOffset(null);bt.facelet=SOLVED;bt.moves=[];closeBt();toast('ตั้งค่าแล้ว ลูกนี้คือลูกที่เรียงแล้ว');
+$('#btReset').onclick=()=>{if(!bt.on)return;btWrite(0xa1);bt.raw=SOLVED;setOffset(null);bt.facelet=SOLVED;bt.moves=[];try{localStorage.setItem('rubik-bt-last',SOLVED);}catch(e){}closeBt();toast('ตั้งค่าแล้ว ลูกนี้คือลูกที่เรียงแล้ว');
   if(mode==='live'||mode==='practice'||(mode==='demo'&&demo&&demo.live))goLive(curTab==='practice'?'practice':'live');};
 $('#btCopy').onclick=async()=>{const txt=[`device: ${bt.name}`,`ua: ${navigator.userAgent}`,`synced: ${!!bt.X}`,`raw-now: ${bt.raw} (${checkFacelet(bt.raw)||'ok'})`].concat(btLog.map(x=>`${x.t} | ${x.ok} | pm:${x.pm} | mv:${x.mv} | ${x.hex} | ${x.raw}`)).join('\n');
   try{await navigator.clipboard.writeText(txt);toast('คัดลอกแล้ว วางในแชทได้เลย');}catch(e){const el=$('#btLog');el.textContent=txt;toast('คัดลอกอัตโนมัติไม่ได้ กดค้างที่ข้อความเพื่อคัดลอก');}};
@@ -1025,8 +1038,8 @@ $('#btSync').onclick=()=>{
   const m=$('#btSolveMsg');if(!bt.on)return;
   const errs=validate();
   if(errs.length){m.innerHTML='<div class="errcard"><strong>ยังซิงค์ไม่ได้</strong><ul>'+errs.map(e=>'<li>'+e+'</li>').join('')+`</ul><p class="small" style="margin:0">กรอกหรือถ่ายรูปให้ครบ 6 ด้านในส่วนด้านล่างก่อน ถือกลางสี${N.U}ไว้บน กลางสี${N.F}หันหาตัวทุกครั้ง</p></div>`;return;}
-  const T=Cube.fromString(entry.join('')),X=T.clone();X.multiply(cubeInv(Cube.fromString(bt.raw)));
-  setOffset(X);bt.facelet=entry.join('');bt.moves=[];m.innerHTML='';
+  const T=Cube.fromString(entry.join(''));let X=null;if(bt.mode!=='moves'){X=T.clone();X.multiply(cubeInv(Cube.fromString(bt.raw)));}
+  if(bt.mode==='moves'){setOffset(null);}else setOffset(X);bt.facelet=entry.join('');bt.moves=[];m.innerHTML='';try{localStorage.setItem('rubik-bt-last',bt.facelet);}catch(e){}
   if(bt.facelet===SOLVED){btWrite(0xa1);bt.raw=SOLVED;setOffset(null);}
   goLive('live');toTop();toast('ซิงค์แล้ว ลองหมุนลูกจริงดู หน้าจอควรตรงกันแล้ว');
 };

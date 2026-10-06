@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="app.css?v=7">
+<link rel="stylesheet" href="app.css?v=8">
 </head>
 <body>
 <div class="app">
@@ -95,6 +95,7 @@
           <p class="muted small" style="margin:4px 0 10px">กรอกหรือถ่ายรูปสีลูกจริงให้ครบ 6 ด้านในส่วนด้านล่าง แล้วกดซิงค์ แอปจะใช้สีที่กรอกเป็นจุดเริ่ม แล้วหมุนตามลูกจริงต่อ พอเรียงเสร็จ แอปจะแก้ความจำในลูกให้ตรงเอง</p>
           <button class="btn" id="btSync" style="width:100%">ซิงค์จากสีที่กรอก</button>
           <p class="small" id="btSyncState" style="margin:8px 0 0;color:var(--ok)" hidden>กำลังใช้สภาพลูกจากสีที่กรอก</p>
+          <p class="small" id="btModeNote" style="margin:8px 0 0;color:var(--warn)" hidden>ลูกนี้ส่งสภาพลูกที่อ่านไม่ได้ แอปจึงนับท่าที่หมุนแทน ต้องกด “ซิงค์จากสีที่กรอก” 1 ครั้งให้ตรงกับลูกจริงก่อน</p>
         </div>
         <div id="btSolveMsg"></div>
       </div>
@@ -210,7 +211,7 @@
   <button role="tab" id="navSolve" aria-selected="false" aria-controls="solve"><svg class="i" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>แก้ลูกจริง</button>
 </div></nav>
 
-<script src="vendor/cube.js?v=7"></script>
-<script src="app.js?v=7"></script>
+<script src="vendor/cube.js?v=8"></script>
+<script src="app.js?v=8"></script>
 </body>
 </html>
