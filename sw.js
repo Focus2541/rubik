@@ -1,6 +1,6 @@
 // Offline cache for the Rubik app. Files are versioned (?v=N) so updates are picked up automatically.
-const VERSION='rubik-v9';
-const CORE=['./','./index.html','./app.css?v=9','./app.js?v=9','./vendor/cube.js?v=9','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
+const VERSION='rubik-v10';
+const CORE=['./','./index.html','./app.css?v=10','./app.js?v=10','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(VERSION).then(c=>c.addAll(CORE.map(u=>new Request(u,{cache:'reload'})))).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==VERSION).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
 self.addEventListener('fetch',e=>{
