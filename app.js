@@ -1,6 +1,6 @@
 (() => {
 const $=s=>document.querySelector(s);
-const APP_VER='8';
+const APP_VER='9';
 const FACE={U:[0,1,0],D:[0,-1,0],R:[1,0,0],L:[-1,0,0],F:[0,0,1],B:[0,0,-1]};
 const DEF_COL={U:'#FFD500',D:'#F4F6F8',F:'#009E60',B:'#0051BA',R:'#FF5800',L:'#C41E3A'};
 const DEF_NAME={U:'เหลือง',D:'ขาว',F:'เขียว',B:'น้ำเงิน',R:'ส้ม',L:'แดง'};
@@ -1034,14 +1034,21 @@ $('#btCopy').onclick=async()=>{const txt=[`device: ${bt.name}`,`ua: ${navigator.
   try{await navigator.clipboard.writeText(txt);toast('คัดลอกแล้ว วางในแชทได้เลย');}catch(e){const el=$('#btLog');el.textContent=txt;toast('คัดลอกอัตโนมัติไม่ได้ กดค้างที่ข้อความเพื่อคัดลอก');}};
 $('#btUnsync').onclick=()=>{setOffset(null);if(bt.on){bt.facelet=bt.raw;bt.moves=[];if(mode==='live'||mode==='practice')goLive(mode);}toast('ล้างการซิงค์แล้ว');};
 $('#btScramble').onclick=btScramble;$('#btSolve').onclick=btSolve;
-$('#btSync').onclick=()=>{
-  const m=$('#btSolveMsg');if(!bt.on)return;
-  const errs=validate();
-  if(errs.length){m.innerHTML='<div class="errcard"><strong>ยังซิงค์ไม่ได้</strong><ul>'+errs.map(e=>'<li>'+e+'</li>').join('')+`</ul><p class="small" style="margin:0">กรอกหรือถ่ายรูปให้ครบ 6 ด้านในส่วนด้านล่างก่อน ถือกลางสี${N.U}ไว้บน กลางสี${N.F}หันหาตัวทุกครั้ง</p></div>`;return;}
-  const T=Cube.fromString(entry.join(''));let X=null;if(bt.mode!=='moves'){X=T.clone();X.multiply(cubeInv(Cube.fromString(bt.raw)));}
-  if(bt.mode==='moves'){setOffset(null);}else setOffset(X);bt.facelet=entry.join('');bt.moves=[];m.innerHTML='';try{localStorage.setItem('rubik-bt-last',bt.facelet);}catch(e){}
-  if(bt.facelet===SOLVED){btWrite(0xa1);bt.raw=SOLVED;setOffset(null);}
-  goLive('live');toTop();toast('ซิงค์แล้ว ลองหมุนลูกจริงดู หน้าจอควรตรงกันแล้ว');
+$('#btSync').onclick=async()=>{
+  const m=$('#btSolveMsg');
+  if(!bt.on){m.innerHTML='<div class="errcard"><strong>ยังไม่ได้เชื่อมลูก</strong></div>';return;}
+  m.innerHTML='<div class="infocard">กำลังซิงค์…</div>';
+  try{
+    const errs=validate();
+    if(errs.length){m.innerHTML='<div class="errcard"><strong>ยังซิงค์ไม่ได้ เพราะสีที่กรอกยังไม่ถูกต้อง</strong><ul>'+errs.map(e=>'<li>'+e+'</li>').join('')+`</ul><p class="small" style="margin:0">แก้สีในส่วนด้านล่างก่อน ถือกลางสี${N.U}ไว้บน กลางสี${N.F}หันหาตัวทุกครั้ง</p></div>`;m.scrollIntoView({block:'nearest'});return;}
+    const f=entry.join('');let X=null;
+    if(bt.mode!=='moves'){X=Cube.fromString(f);X.multiply(cubeInv(Cube.fromString(bt.raw)));}
+    setOffset(X);bt.facelet=f;bt.moves=[];try{localStorage.setItem('rubik-bt-last',f);}catch(e){}
+    if(f===SOLVED&&bt.mode!=='moves'){btWrite(0xa1);bt.raw=SOLVED;setOffset(null);}
+    await goLive('live');
+    m.innerHTML=`<div class="infocard"><strong>ซิงค์แล้ว ✓</strong> ลูกบนจอตอนนี้ตรงกับสีที่กรอก ลองหมุนลูกจริงดู${bt.mode==='moves'?' (โหมดนับท่า: หมุนช้า ๆ ทีละท่า)':''}</div>`;
+    toTop();toast('ซิงค์แล้ว ลองหมุนลูกจริงดู');
+  }catch(e){m.innerHTML=`<div class="errcard"><strong>ซิงค์ไม่สำเร็จ</strong><p class="small" style="margin:4px 0 0">${(e&&e.message)||e} — กด “คัดลอกข้อมูล” ในหน้าบลูทูธแล้วส่งให้ Claude</p></div>`;}
 };
 addEventListener('keydown',e=>{if(e.key==='Escape'&&!btSheet.hidden)closeBt();});
 
