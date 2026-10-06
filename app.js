@@ -780,6 +780,7 @@ function cubeInv(c){const r=new Cube();for(let i=0;i<8;i++){r.cp[c.cp[i]]=i;r.co
 function tracked(raw){if(!bt.X)return raw;const r=bt.X.clone();r.multiply(Cube.fromString(raw));return r.asString();}
 function setOffset(x){bt.X=x;try{if(x)localStorage.setItem('rubik-bt-offset',x.asString());else localStorage.removeItem('rubik-bt-offset');}catch(e){}const st=$('#btSyncState');if(st)st.hidden=!x;}
 const after=(f,m)=>{const c=Cube.fromString(f);c.move(m);return c.asString();};
+const ALL_MOVES=[].concat(...'URFDLB'.split('').map(f=>[f,f+"'",f+'2']));
 let toastT;function toast(t){const e=$('#toast');e.textContent=t;e.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>e.hidden=true,3200);}
 function btUI(){
   document.body.classList.toggle('bt-on',bt.on);
@@ -854,7 +855,9 @@ function onBtData(dv){
   const r=GK.parse(dv);if(!bt.on||r.facelet===bt.raw)return;
   const prev=bt.facelet;bt.raw=r.facelet;let cur;try{cur=tracked(r.facelet);}catch(e){cur=r.facelet;}
   bt.facelet=cur;r.facelet=cur;
-  let mv=null;try{if(r.move&&prev&&after(prev,r.move)===cur)mv=r.move;}catch(e){}
+  let mv=null;
+  if(prev){const cands=(r.move?[r.move]:[]).concat(ALL_MOVES);
+    for(const m of cands){try{if(after(prev,m)===cur){mv=m;break;}}catch(e){}}}
   if(bt.X&&cur===SOLVED){btWrite(0xa1);bt.raw=SOLVED;setOffset(null);setTimeout(()=>toast('เรียงเสร็จ แก้ความจำในลูกให้ตรงแล้ว'),400);}
   if(mv){bt.moves.push(mv);if(bt.moves.length>300)bt.moves.shift();}
   if(cal.step&&mv)calMove(mv);
