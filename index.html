@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="app.css">
+<link rel="stylesheet" href="app.css?v=7">
 </head>
 <body>
 <div class="app">
@@ -81,6 +81,7 @@
           <label class="btn" for="importIn" style="cursor:pointer">นำเข้าไฟล์</label>
         </div>
         <input type="file" id="importIn" class="vh" accept=".json,application/json">
+        <p class="muted small" style="margin:12px 0 0;text-align:center">เวอร์ชัน <span id="appVer"></span></p>
       </div>
     </section>
 
@@ -177,6 +178,12 @@
       <p>ถ้าลูกในจอไม่ตรงกับลูกจริง ให้เรียงลูกจริงให้เสร็จ แล้วกด “ตั้งให้ลูกนี้เป็นลูกที่เรียงแล้ว” ถ้าสีในจอไม่ตรงกับลูกจริง ตั้งสีได้ที่หน้า แก้ลูกจริง &gt; สีของรูบิคและเครื่องมือ</p>
       <button class="btn primary" id="btCalStart" style="width:100%;margin-bottom:8px">ตั้งสีและทิศทางลูกนี้อัตโนมัติ</button>
       <button class="btn" id="btReset" style="width:100%">ตั้งให้ลูกนี้เป็นลูกที่เรียงแล้ว</button>
+      <details class="calbox" id="btDiag" style="display:block">
+        <summary style="cursor:pointer;font-family:Mitr,sans-serif">ข้อมูลสำหรับแก้ปัญหา</summary>
+        <p class="muted small" style="margin:8px 0">หมุนลูกจริงสัก 5–6 ท่า แล้วกด “คัดลอกข้อมูล” ส่งให้ Claude ดู</p>
+        <pre id="btLog" style="font-size:11px;line-height:1.4;white-space:pre-wrap;word-break:break-all;max-height:160px;overflow:auto;background:var(--surface);padding:8px;border-radius:10px;margin:0"></pre>
+        <div class="row"><button class="btn" id="btCopy">คัดลอกข้อมูล</button><button class="btn" id="btUnsync">ล้างการซิงค์</button></div>
+      </details>
       <div class="calbox" id="calBox" hidden>
         <div id="calPick">
           <p style="margin:0 0 8px">ลูกนี้ใช้สีแบบไหน</p>
@@ -203,7 +210,7 @@
   <button role="tab" id="navSolve" aria-selected="false" aria-controls="solve"><svg class="i" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>แก้ลูกจริง</button>
 </div></nav>
 
-<script src="vendor/cube.js"></script>
-<script src="app.js"></script>
+<script src="vendor/cube.js?v=7"></script>
+<script src="app.js?v=7"></script>
 </body>
 </html>

@@ -1,5 +1,6 @@
 (() => {
 const $=s=>document.querySelector(s);
+const APP_VER='7';
 const FACE={U:[0,1,0],D:[0,-1,0],R:[1,0,0],L:[-1,0,0],F:[0,0,1],B:[0,0,-1]};
 const DEF_COL={U:'#FFD500',D:'#F4F6F8',F:'#009E60',B:'#0051BA',R:'#FF5800',L:'#C41E3A'};
 const DEF_NAME={U:'เหลือง',D:'ขาว',F:'เขียว',B:'น้ำเงิน',R:'ส้ม',L:'แดง'};
@@ -957,7 +958,7 @@ let lastStage=null,coachBusy=false;
 function updateCoach(fromMove){
   if(!bt.on||!bt.facelet)return;
   const txt=$('#coachText');
-  if(!LBL._ready){if(coachBusy)return;coachBusy=true;txt.textContent='กำลังวิเคราะห์ลูก…';setTimeout(()=>{LBL.init();LBL._ready=true;coachBusy=false;updateCoach(false);},30);return;}
+  if(!LBL._ready){if(coachBusy)return;coachBusy=true;txt.textContent='กำลังวิเคราะห์ลูก…';setTimeout(()=>{try{LBL.init();LBL._ready=true;}catch(e){txt.textContent='วิเคราะห์ลูกไม่สำเร็จ ('+(e&&e.message)+') ลองรีเฟรชหน้า';coachBusy=false;return;}coachBusy=false;updateCoach(false);},30);return;}
   let st;try{st=LBL.stageOf(bt.facelet);}catch(e){txt.textContent='อ่านสภาพลูกไม่ได้ ลองกด “ตั้งให้ลูกนี้เป็นลูกที่เรียงแล้ว” หลังเรียงลูกจริง หรือส่งข้อมูลแก้ปัญหาให้ Claude';return;}
   [...$('#coachBar').children].forEach((e,i)=>e.classList.toggle('on',i<st));
   $('#coachSub').textContent=`ถือกลางสี${N.U}ไว้บน สี${N.F}หันหาตัว`;
@@ -1055,7 +1056,7 @@ const endDrag=()=>drag=null;stage.addEventListener('pointerup',endDrag);stage.ad
 $('#resetView').onclick=()=>{vx=-28;vy=-38;setView();};
 
 let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(async()=>{await idle();layout();},120);});
-build();setView();renderLesson();renderPad();renderPlayer();
+build();setView();renderLesson();renderPad();renderPlayer();$('#appVer').textContent=APP_VER;
 // offline / install support when self-hosted (e.g. GitHub Pages)
 if(location.protocol==='https:'&&!/claude|anthropic/.test(location.hostname)){
   try{const l=document.createElement('link');l.rel='manifest';l.href='manifest.webmanifest';document.head.appendChild(l);
