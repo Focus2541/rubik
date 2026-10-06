@@ -406,6 +406,14 @@ $('#fromApp').onclick=async()=>{stopAll();await idle();entry=(mode==='edit'&&app
 const SETS=new Set();
 for(let x=-1;x<=1;x++)for(let y=-1;y<=1;y++)for(let z=-1;z<=1;z++){const l=[];for(const f in FACE){const n=FACE[f];if((n[0]&&n[0]===x)||(n[1]&&n[1]===y)||(n[2]&&n[2]===z))l.push(f);}if(l.length>1)SETS.add(l.sort().join(''));}
 const parity=p=>{let n=0;for(let i=0;i<p.length;i++)for(let j=i+1;j<p.length;j++)if(p[i]>p[j])n++;return n%2;};
+function checkFacelet(s){
+  if(!s||s.length!==54)return'ความยาวไม่ครบ';
+  for(const f of ORDER)if(s.split('').filter(x=>x===f).length!==9)return'จำนวนสีไม่ครบ 9';
+  const pieces={};ORDER.split('').forEach((f,fi)=>{for(let k=0;k<9;k++){const pk=key(facePos(f,k/3|0,k%3));(pieces[pk]=pieces[pk]||[]).push(s[fi*9+k]);}});
+  const seen={};for(const pk in pieces){const l=pieces[pk];if(l.length<2)continue;const id=l.slice().sort().join('');if(!SETS.has(id))return'มีชิ้นที่ไม่มีจริง '+id;if(seen[id])return'ชิ้นซ้ำ '+id;seen[id]=1;}
+  try{const c=Cube.fromString(s);if(c.co.reduce((a,b)=>a+b,0)%3)return'มุมบิด';if(c.eo.reduce((a,b)=>a+b,0)%2)return'ขอบกลับ';if(parity(c.cp)!==parity(c.ep))return'สลับคู่';}catch(e){return'อ่านไม่ได้';}
+  return'';
+}
 function validate(){
   const s=entry.join(''),errs=[];
   const unk=entry.filter(x=>x==='X').length;if(unk)errs.push(`ยังกรอกไม่ครบ เหลืออีก ${unk} ช่อง`);
@@ -777,9 +785,13 @@ const BT_DATA=U16('aadb'),BT_DATA_C=U16('aadc'),BT_RW=U16('aaaa'),BT_R=U16('aaab
 const SOLVED='UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB';
 const bt={on:false,dev:null,w:null,facelet:null,raw:null,X:null,shown:null,name:'',battery:null,moves:[],timer:null};
 function cubeInv(c){const r=new Cube();for(let i=0;i<8;i++){r.cp[c.cp[i]]=i;r.co[c.cp[i]]=(3-c.co[i])%3;}for(let i=0;i<12;i++){r.ep[c.ep[i]]=i;r.eo[c.ep[i]]=c.eo[i];}return r;}
-function tracked(raw){if(!bt.X)return raw;const r=bt.X.clone();r.multiply(Cube.fromString(raw));return r.asString();}
+function tracked(raw){if(!bt.X||checkFacelet(raw))return raw;const r=bt.X.clone();r.multiply(Cube.fromString(raw));return r.asString();}
 function setOffset(x){bt.X=x;try{if(x)localStorage.setItem('rubik-bt-offset',x.asString());else localStorage.removeItem('rubik-bt-offset');}catch(e){}const st=$('#btSyncState');if(st)st.hidden=!x;}
 const after=(f,m)=>{const c=Cube.fromString(f);c.move(m);return c.asString();};
+const btLog=[];
+function hexOf(dv){let h='';for(let i=0;i<dv.byteLength;i++)h+=dv.getUint8(i).toString(16).padStart(2,'0');return h;}
+function logBt(dv,r,cur,mv){btLog.push({t:new Date().toLocaleTimeString('th-TH'),hex:hexOf(dv),raw:r.facelet,ok:checkFacelet(r.facelet)||'ok',pm:r.move||'-',mv:mv||'-',cur});if(btLog.length>12)btLog.shift();
+  const el=$('#btLog');if(el)el.textContent=btLog.map(x=>`${x.t} ${x.ok} ท่าจากลูก:${x.pm} ท่าที่หาได้:${x.mv}\n${x.hex}\n${x.raw}`).join('\n\n');}
 const ALL_MOVES=[].concat(...'URFDLB'.split('').map(f=>[f,f+"'",f+'2']));
 let toastT;function toast(t){const e=$('#toast');e.textContent=t;e.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>e.hidden=true,3200);}
 function btUI(){
@@ -808,7 +820,7 @@ async function setupGatt(dev){
   const c=await (await g.getPrimaryService(BT_DATA)).getCharacteristic(BT_DATA_C);
   if(c.removeEventListener)c.removeEventListener('characteristicvaluechanged',onBtChar);c.addEventListener('characteristicvaluechanged',onBtChar);
   await c.startNotifications();
-  const first=GK.parse(await c.readValue());
+  const fv=await c.readValue();const first=GK.parse(fv);try{logBt(fv,first,'',null);}catch(e){}
   let X=null;try{const o=localStorage.getItem('rubik-bt-offset');if(o)X=Cube.fromString(o);}catch(e){}
   Object.assign(bt,{on:true,dev,raw:first.facelet,name:dev.name||'GiiKER',manual:false});setOffset(X);bt.facelet=tracked(bt.raw);
   try{const rw=await g.getPrimaryService(BT_RW);const r=await rw.getCharacteristic(BT_R);bt.w=await rw.getCharacteristic(BT_W);
@@ -858,6 +870,7 @@ function onBtData(dv){
   let mv=null;
   if(prev){const cands=(r.move?[r.move]:[]).concat(ALL_MOVES);
     for(const m of cands){try{if(after(prev,m)===cur){mv=m;break;}}catch(e){}}}
+  logBt(dv,r,cur,mv);
   if(bt.X&&cur===SOLVED){btWrite(0xa1);bt.raw=SOLVED;setOffset(null);setTimeout(()=>toast('เรียงเสร็จ แก้ความจำในลูกให้ตรงแล้ว'),400);}
   if(mv){bt.moves.push(mv);if(bt.moves.length>300)bt.moves.shift();}
   if(cal.step&&mv)calMove(mv);
@@ -945,7 +958,7 @@ function updateCoach(fromMove){
   if(!bt.on||!bt.facelet)return;
   const txt=$('#coachText');
   if(!LBL._ready){if(coachBusy)return;coachBusy=true;txt.textContent='กำลังวิเคราะห์ลูก…';setTimeout(()=>{LBL.init();LBL._ready=true;coachBusy=false;updateCoach(false);},30);return;}
-  const st=LBL.stageOf(bt.facelet);
+  let st;try{st=LBL.stageOf(bt.facelet);}catch(e){txt.textContent='อ่านสภาพลูกไม่ได้ ลองกด “ตั้งให้ลูกนี้เป็นลูกที่เรียงแล้ว” หลังเรียงลูกจริง หรือส่งข้อมูลแก้ปัญหาให้ Claude';return;}
   [...$('#coachBar').children].forEach((e,i)=>e.classList.toggle('on',i<st));
   $('#coachSub').textContent=`ถือกลางสี${N.U}ไว้บน สี${N.F}หันหาตัว`;
   if(st===7)txt.innerHTML='<b>ลูกเรียงครบแล้ว</b> ลองหมุนให้มั่ว แล้วเริ่มขั้น 1 ใหม่';
@@ -1003,6 +1016,9 @@ btSheet.addEventListener('click',e=>{if(e.target===btSheet)closeBt();});
 $('#btGo').onclick=()=>{if(bt.on){bt.manual=true;const d=bt.dev;onBtDisconnect();try{d.gatt.disconnect();}catch(e){}closeBt();}else btConnect();};
 $('#btReset').onclick=()=>{if(!bt.on)return;btWrite(0xa1);bt.raw=SOLVED;setOffset(null);bt.facelet=SOLVED;bt.moves=[];closeBt();toast('ตั้งค่าแล้ว ลูกนี้คือลูกที่เรียงแล้ว');
   if(mode==='live'||mode==='practice'||(mode==='demo'&&demo&&demo.live))goLive(curTab==='practice'?'practice':'live');};
+$('#btCopy').onclick=async()=>{const txt=[`device: ${bt.name}`,`ua: ${navigator.userAgent}`,`synced: ${!!bt.X}`,`raw-now: ${bt.raw} (${checkFacelet(bt.raw)||'ok'})`].concat(btLog.map(x=>`${x.t} | ${x.ok} | pm:${x.pm} | mv:${x.mv} | ${x.hex} | ${x.raw}`)).join('\n');
+  try{await navigator.clipboard.writeText(txt);toast('คัดลอกแล้ว วางในแชทได้เลย');}catch(e){const el=$('#btLog');el.textContent=txt;toast('คัดลอกอัตโนมัติไม่ได้ กดค้างที่ข้อความเพื่อคัดลอก');}};
+$('#btUnsync').onclick=()=>{setOffset(null);if(bt.on){bt.facelet=bt.raw;bt.moves=[];if(mode==='live'||mode==='practice')goLive(mode);}toast('ล้างการซิงค์แล้ว');};
 $('#btScramble').onclick=btScramble;$('#btSolve').onclick=btSolve;
 $('#btSync').onclick=()=>{
   const m=$('#btSolveMsg');if(!bt.on)return;
