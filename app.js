@@ -2039,7 +2039,7 @@
 // app
 (() => {
 const $=s=>document.querySelector(s);
-const APP_VER='10';
+const APP_VER='11';
 const FACE={U:[0,1,0],D:[0,-1,0],R:[1,0,0],L:[-1,0,0],F:[0,0,1],B:[0,0,-1]};
 const DEF_COL={U:'#FFD500',D:'#F4F6F8',F:'#009E60',B:'#0051BA',R:'#FF5800',L:'#C41E3A'};
 const DEF_NAME={U:'เหลือง',D:'ขาว',F:'เขียว',B:'น้ำเงิน',R:'ส้ม',L:'แดง'};
@@ -2089,8 +2089,12 @@ const baseT=(c,a=[0,0,0])=>`rotateX(${a[0]}deg) rotateY(${a[1]}deg) rotateZ(${a[
 function paint(c){
   const center=Math.abs(c.p[0])+Math.abs(c.p[1])+Math.abs(c.p[2])===1;
   for(const[f,n]of c.faces){const i=f.firstChild,col=c.st[key(n)];
-    if(col){i.style.display='';i.style.background=COL[col];i.textContent=center&&col!=='X'?col:'';}else i.style.display='none';}
+    if(col){i.style.display='';i.style.background=COL[col];i.textContent=center&&col!=='X'?col:'';i.style.opacity=clipHL&&!center&&!hlMatch(c,clipHL)?'.16':'';}else i.style.display='none';}
 }
+let clipHL=null;
+function hlMatch(c,hl){const v=Object.values(c.st),n=v.length,has=x=>v.includes(x);
+  switch(hl){case'De':return n===2&&has('D');case'Dc':return n===3&&has('D');case'D':return has('D');case'mid':return n===2&&!has('U')&&!has('D');
+    case'Ue':return n===2&&has('U');case'Uc':return n===3&&has('U');case'U':return has('U');default:return true;}}
 function renderC(c){c.el.style.transition='none';c.el.style.transform=baseT(c);paint(c);}
 function layout(){
   S=Math.max(30,Math.floor(Math.min(stage.clientWidth,stage.clientHeight)/5.6));
@@ -2121,7 +2125,7 @@ async function runQueue(){busy=true;renderPlayer();
   while(queue.length){const j=queue.shift();j.before&&j.before();await animate(j.tok,j.dur);j.after&&j.after();}
   busy=false;idleWaiters.splice(0).forEach(r=>r());renderPlayer();}
 const idle=()=>busy?new Promise(r=>idleWaiters.push(r)):Promise.resolve();
-const stopAll=()=>{queue=[];};
+const stopAll=()=>{queue=[];if(typeof stopClip==='function')stopClip();};
 
 // ---------- state ----------
 let mode='intro',demo=null,history=[],scrambleSeq=[],armed=false,t0=0,elapsed=null,running=false,autoTimer=null;
@@ -2164,6 +2168,23 @@ function renderPlayer(){
   $('#mvNote').textContent='';big.className='';ds.className='';chips.textContent='';ctr.textContent='';ctr.hidden=true;track.hidden=true;chips.hidden=true;
   const chip=(t,c)=>{const s=document.createElement('span');s.className='chip '+(c||'');s.textContent=t;chips.appendChild(s);return s;};
   const cbtn=(html,label,fn,primary,dis)=>{const b=document.createElement('button');b.type='button';b.className='cbtn'+(primary?' primary':'');b.innerHTML=html;b.setAttribute('aria-label',label);b.disabled=!!dis;b.onclick=fn;ctr.appendChild(b);};
+  if(mode==='clip'&&clip){
+    const c=clip,n=c.data.scenes.length,sc=c.data.scenes[Math.min(c.i,n-1)];
+    tt.textContent=c.data.title;
+    if(c.done){big.textContent='✓';big.className='ok';ds.textContent='จบคลิปแล้ว';ds.className='ok';}
+    else if(c.moves&&c.moveIdx!=null&&c.moveIdx<c.moves.length){big.textContent=c.moves[c.moveIdx];big.className='now';ds.textContent=describe(c.moves[c.moveIdx]);}
+    else{big.textContent=`${Math.min(c.i+1,n)}/${n}`;big.className='long';ds.textContent=c.paused?'หยุดชั่วคราว':`ฉากที่ ${Math.min(c.i+1,n)} จาก ${n}`;}
+    track.hidden=false;fill.style.width=((c.done?n:c.i)/n*100)+'%';
+    if(c.moves&&c.moves.length>1){chips.hidden=false;c.moves.forEach((t,k)=>chip(t,k===c.moveIdx?'now':k<(c.moveIdx??0)?'done':''));}
+    ctr.hidden=false;
+    if(c.done){ctr.style.gridTemplateColumns='1fr 1fr';cbtn(ICON.restart+'ดูอีกครั้ง','ดูอีกครั้ง',()=>playClip(c.data,0),false);
+      if(c.data.next)cbtn(ICON.play+'คลิปถัดไป','คลิปถัดไป',()=>{const nx=c.data.next();if(nx)playClip(nx.clip,0,nx.step);},true);else cbtn('ปิด','ปิดคลิป',()=>{stopAll();mode='intro';renderPlayer();},true);return;}
+    ctr.style.gridTemplateColumns='1fr 2fr 1fr';
+    cbtn(ICON.back,'ฉากก่อน',()=>playClip(c.data,Math.max(0,c.i-1)),false,c.i===0);
+    cbtn(c.paused?ICON.play+'เล่นต่อ':ICON.pause+'หยุด',c.paused?'เล่นต่อ':'หยุด',()=>{c.paused=!c.paused;if(c.paused&&HAS_TTS)speechSynthesis.cancel();renderPlayer();},true);
+    cbtn(ICON.next,'ฉากถัดไป',()=>playClip(c.data,Math.min(n-1,c.i+1)),false,c.i>=n-1);
+    return;
+  }
   if(mode==='demo'&&demo&&demo.live){
     const d=demo,n=d.moves.length,done=d.i>=n;
     tt.textContent=d.title;segInfo(d,d.i,tt);
@@ -2251,10 +2272,107 @@ function say(text,force){if(!HAS_TTS||(!voiceOn&&!force)||!text)return;try{speec
 function segAt(d,k){return d.segs?d.segs.find(g=>k>=g.start&&k<g.end):null;}
 function sayMove(d,k){const t=d.moves[k];if(!t)return;const g=segAt(d,k);let pre='';
   if(g&&g.start===k)pre=thVoice?`ขั้น ${g.step} ${g.title} `:`step ${g.step}, `;say(pre+moveWords(t));}
-function voiceUI(){const b=$('#voiceBtn');if(!b)return;b.hidden=!HAS_TTS||!(mode==='demo'&&demo&&demo.kind!=='lesson');b.setAttribute('aria-pressed',voiceOn);
+function voiceUI(){const b=$('#voiceBtn');if(!b)return;b.hidden=!HAS_TTS||!((mode==='demo'&&demo&&demo.kind!=='lesson')||mode==='clip');b.setAttribute('aria-pressed',voiceOn);
   $('#voiceWave').style.display=voiceOn?'':'none';$('#voiceMute').style.display=voiceOn?'none':'';}
 $('#voiceBtn').onclick=()=>{voiceOn=!voiceOn;try{localStorage.setItem('rubik-voice',voiceOn?'1':'0');}catch(e){}voiceUI();
   if(voiceOn){if(demo&&demo.live&&demo.i<demo.moves.length)sayMove(demo,demo.i);else say(thVoice?'เปิดเสียงแล้ว':'voice on',true);}else if(HAS_TTS)speechSynthesis.cancel();};
+
+// ---------- video-style lesson clips ----------
+let clip=null,clipGen=0;
+function stopClip(){if(!clip)return;clipGen++;clip=null;document.body.classList.remove('clip-on');setTimeout(layout,50);clipHL=null;$('#capbar').hidden=true;if(HAS_TTS)try{speechSynthesis.cancel();}catch(e){}cubies.forEach(paint);}
+const alive=g=>clip&&clip.g===g;
+async function waitPause(g){while(alive(g)&&clip.paused)await sleep(120);}
+function speakWait(text,g){
+  if(voiceOn&&HAS_TTS)return new Promise(res=>{let done=false;const fin=()=>{if(!done){done=true;res();}};
+    try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);if(thVoice){u.voice=thVoice;u.lang=thVoice.lang;}else u.lang='th-TH';u.rate=1.05;u.onend=fin;u.onerror=fin;speechSynthesis.speak(u);}catch(e){fin();}
+    setTimeout(fin,Math.max(4000,text.length*160));});
+  return sleep(Math.max(2200,text.length*70));
+}
+function clipStateUpTo(data,k){build();for(let j=0;j<k;j++){const sc=data.scenes[j];if(sc.setup!==undefined){build();split(sc.setup).forEach(applyModel);}if(sc.moves)split(sc.moves).forEach(applyModel);}cubies.forEach(renderC);}
+async function playClip(data,start,step){
+  stopAll();clearTimeout(autoTimer);await idle();
+  const g=++clipGen;clip={data,i:start||0,g,paused:false,moves:null,moveIdx:null,done:false};mode='clip';demo=null;
+  document.body.classList.add('clip-on');
+  if(clip.i>0)clipStateUpTo(data,clip.i);else{build();}
+  layout();
+  toTop();renderPlayer();runScenes(g);
+}
+async function runScenes(g){
+  const cap=$('#capbar');
+  while(alive(g)&&clip.i<clip.data.scenes.length){
+    const sc=clip.data.scenes[clip.i];clip.moves=null;clip.moveIdx=null;
+    if(sc.setup!==undefined){build();split(sc.setup).forEach(applyModel);cubies.forEach(renderC);}
+    clipHL=sc.hl||null;cubies.forEach(paint);
+    if(sc.view){vx=sc.view[0];vy=sc.view[1];setView();}else if(sc.setup!==undefined){vx=-28;vy=-38;setView();}
+    const text=ct(sc.cap);cap.textContent=text;cap.hidden=false;renderPlayer();
+    await speakWait(ct(sc.say||sc.cap),g);if(!alive(g))return;await waitPause(g);
+    if(sc.moves){const ms=split(sc.moves);clip.moves=ms;
+      for(let k=0;k<ms.length;k++){await waitPause(g);if(!alive(g))return;clip.moveIdx=k;renderPlayer();
+        busy=true;await animate(ms[k],reduce?0:620);busy=false;idleWaiters.splice(0).forEach(r=>r());if(queue.length)runQueue();
+        if(!alive(g))return;await sleep(140);}
+      clip.moveIdx=ms.length;renderPlayer();}
+    await sleep(sc.wait||900);await waitPause(g);if(!alive(g))return;
+    clip.i++;
+  }
+  if(alive(g)){clip.done=true;clipHL=null;cubies.forEach(paint);renderPlayer();}
+}
+const invA=a=>invert(split(a)).join(' ');
+const TOPV=[-62,-30],BOTV=[38,-38];
+const CL_A="F R U R' U' F'",CL_RA="U R U' R' U' F' U F",CL_LA="U' L' U L U F U' F'",CL_SUNE="R U R' U R U2 R' U",CL_NIK="U R U' L' U R' U' L";
+const CLIPS=[
+ {title:'คลิปขั้นเริ่ม: อ่านสัญลักษณ์',scenes:[{setup:'',cap:'ก่อนเริ่ม มารู้จักชื่อท่าหมุนกัน ถือสีเหลืองไว้บน สีเขียวหันหาตัว'}].concat(
+   ["R","R'","L","L'","U","U'","F","F'","D","D'","B","B'","R2"].map(t=>({setup:'',cap:`${t} คือ${describe(t).replace(/ [↻↺]$/,'')}`,moves:t,wait:600})),
+   [{cap:'ตัวอักษรเฉย ๆ หมุนตามเข็มนาฬิกา มีขีดหมุนทวนเข็ม มีเลข 2 หมุนสองครั้ง พร้อมแล้วไปขั้น 1 กัน'}])},
+ {title:'คลิปขั้น 1: กากบาทสีขาว (เก็บฐาน)',scenes:[
+   {setup:'F2 R2 B2 L2 U',hl:'De',view:TOPV,cap:'ขั้นแรก เก็บฐานด้วยกากบาทสีขาว เริ่มจากทำดอกเดซี่ คือขอบสีขาว 4 ชิ้นล้อมจุดกลางสีเหลืองด้านบน'},
+   {hl:'De',view:[-28,-38],cap:'หมุน U จนสีข้างของขอบขาวตรงกับจุดกลางด้านหน้า',moves:"U'"},
+   {hl:'De',cap:'แล้วหมุนด้านหน้า 2 ครั้ง ขอบขาวจะลงไปอยู่ด้านล่าง',moves:'F2'},
+   {hl:'De',cap:'ทำแบบเดียวกันกับขอบที่เหลือทีละด้าน',moves:'R2 B2 L2'},
+   {hl:'De',view:BOTV,cap:'ได้กากบาทสีขาวด้านล่าง และสีข้างตรงกับจุดกลางทุกด้าน เสร็จขั้น 1'}]},
+ {title:'คลิปขั้น 2: มุมสีขาว (ชั้นแรก)',scenes:[
+   {setup:invA("U R U R' U' R U R' U' R U R' U'"),hl:'Dc',cap:'ขั้น 2 เก็บมุมสีขาวให้ครบชั้นแรก หามุมที่มีสีขาวอยู่ในชั้นบน'},
+   {hl:'Dc',cap:'หมุน U ให้มุมอยู่เหนือช่องของมัน คือระหว่างจุดกลาง 2 สีของมุมนั้น ตรงหน้า-ขวา',moves:'U'},
+   {hl:'Dc',cap:"ทำสูตร R U R' U' ครั้งที่ 1",moves:"R U R' U'"},
+   {hl:'Dc',cap:'ครั้งที่ 2',moves:"R U R' U'"},
+   {hl:'Dc',cap:'ครั้งที่ 3 มุมลงไปถูกที่ สีขาวหันลงล่างแล้ว',moves:"R U R' U'"},
+   {hl:'D',view:BOTV,cap:'ทำแบบนี้กับมุมที่เหลือจนครบ 4 มุม ชั้นแรกก็เสร็จ'}]},
+ {title:'คลิปขั้น 3: ชั้นกลาง (ชั้นที่ 2)',scenes:[
+   {setup:invA(CL_RA),hl:'mid',cap:'ขั้น 3 เก็บชั้นกลาง หาขอบในชั้นบนที่ไม่มีสีเหลือง'},
+   {hl:'mid',cap:'สีหน้าของขอบตรงกับจุดกลางด้านหน้า เป็นตัว T กลับหัว และสีบนตรงกับด้านขวา ใช้สูตรไปขวา',moves:CL_RA},
+   {setup:invA(CL_LA),hl:'mid',cap:'ถ้าสีบนของขอบตรงกับด้านซ้าย ใช้สูตรไปซ้ายแทน',moves:CL_LA},
+   {hl:'mid',cap:'ทำจนครบ 4 ขอบ สองชั้นล่างก็เสร็จ'}]},
+ {title:'คลิปขั้น 4: กากบาทสีเหลือง',scenes:[
+   {setup:invA("F R U R' U' F' U2 F U R U' R' F'"),hl:'Ue',view:TOPV,cap:'ขั้น 4 ดูด้านบน ตอนนี้ขอบเหลืองเป็นแบบจุด'},
+   {hl:'Ue',view:TOPV,cap:"แบบจุด ทำสูตร F R U R' U' F' 1 ครั้ง จะได้ตัว L",moves:CL_A},
+   {hl:'Ue',view:TOPV,cap:'หมุน U ให้แขนตัว L ชี้ไปทางหลังกับทางซ้าย เหมือนเข็มนาฬิกาตอน 9 โมง',moves:'U2'},
+   {hl:'Ue',view:TOPV,cap:'ทำสูตรอีกครั้ง ได้เส้นตรงนอน',moves:CL_A},
+   {hl:'Ue',view:TOPV,cap:'เส้นนอนซ้าย-ขวา ทำสูตรอีกครั้ง ได้กากบาทสีเหลือง',moves:CL_A}]},
+ {title:'คลิปขั้น 5: ขอบเหลืองให้ตรงสี',scenes:[
+   {setup:invA(CL_SUNE),hl:'Ue',cap:'ขั้น 5 หมุน U หาขอบที่สีข้างตรงกับจุดกลางอย่างน้อย 2 ชิ้น ตอนนี้ขอบหลังกับขวาตรงแล้ว'},
+   {hl:'Ue',cap:"ทำสูตร R U R' U R U2 R' U ขอบหน้ากับซ้ายจะสลับกัน",moves:CL_SUNE},
+   {hl:'Ue',cap:'ขอบเหลืองตรงสีครบ 4 ด้านแล้ว'}]},
+ {title:'คลิปขั้น 6: วางมุมเหลือง',scenes:[
+   {setup:invA(CL_NIK),hl:'Uc',cap:'ขั้น 6 หามุมเหลืองที่อยู่ถูกที่ คือสีตรงกับจุดกลาง 3 ด้านรอบมัน ตอนนี้คือมุมหน้า-ขวา-บน'},
+   {hl:'Uc',cap:"หันมุมนั้นไว้หน้า-ขวา-บน แล้วทำ U R U' L' U R' U' L อีก 3 มุมจะวนเข้าที่",moves:CL_NIK},
+   {hl:'Uc',cap:'มุมอยู่ถูกที่ครบแล้ว แม้บางมุมจะหันผิดทาง ขั้นต่อไปค่อยหมุน'}]},
+ {title:'คลิปขั้น 7: หมุนมุมเหลือง (จบ!)',scenes:[
+   {setup:invA("R' D' R D R' D' R D U R' D' R D R' D' R D R' D' R D R' D' R D U'"),hl:'Uc',cap:'ขั้นสุดท้าย หันมุมที่ยังไม่เสร็จไว้หน้า-ขวา-บน'},
+   {hl:'Uc',cap:"ทำ R' D' R D ซ้ำจนสีเหลืองของมุมนั้นหันขึ้น ระหว่างนี้ชั้นล่างจะดูเละ ไม่ต้องตกใจ",moves:"R' D' R D R' D' R D"},
+   {hl:'Uc',cap:'หมุนแค่ U พามุมถัดไปมาไว้ที่เดิม ห้ามหมุนทั้งลูก',moves:'U'},
+   {hl:'Uc',cap:'ทำซ้ำจนสีเหลืองหันขึ้น ชั้นล่างจะกลับมาเอง',moves:"R' D' R D R' D' R D R' D' R D R' D' R D"},
+   {hl:null,cap:'หมุน U ให้ตรงสี เสร็จแล้ว! ลองทำกับลูกจริงดู แล้วไปต่อขั้นสูงได้',moves:"U'"}]},
+];
+CLIPS.forEach((c,i)=>{if(i<CLIPS.length-1)c.next=()=>{goStep(i+1,'basic');return{clip:CLIPS[i+1],step:i+1};};
+  else c.next=()=>{goStep(0,'adv');return{clip:advClip(0),step:0};};});
+function advClip(i){
+  const s=ADV[i],oll=i===1||i===2;
+  const scenes=[{setup:'',cap:`ขั้นสูง ${s.n==='เริ่ม'?'':'ขั้น '+s.n+' '}${s.t}: ${s.goal}`}];
+  if(!s.algs.length)s.how.forEach(h=>scenes.push({cap:h}));
+  s.algs.forEach(([a,cap])=>{scenes.push({setup:invA(a),hl:oll?'U':null,view:oll?TOPV:undefined,cap:cap});scenes.push({hl:oll?'U':null,view:oll?TOPV:undefined,cap:'สูตร '+a,say:'ทำสูตรนี้',moves:a,wait:1100});});
+  const c={title:`คลิปขั้นสูง ${s.n}: ${s.t}`,scenes};
+  if(i<ADV.length-1)c.next=()=>{goStep(i+1,'adv');return{clip:advClip(i+1),step:i+1};};
+  return c;
+}
 
 // ---------- lessons ----------
 const Y='#FFD500',YI='#18213A';
@@ -2330,6 +2448,7 @@ function renderLesson(){
   const bc=cs===0?null:adv?COL.U:stepCol(cs);
   if(bc){bd.style.setProperty('--sc',bc);bd.style.setProperty('--sci',inkOn(bc));}else{bd.style.setProperty('--sc','var(--accent)');bd.style.setProperty('--sci','var(--accent-ink)');}
   const ht=el('div');ht.append(el('h2','',ct(s.t)),el('p','',ct(s.goal)));head.append(bd,ht);L.appendChild(head);
+  const cb=el('button','btn ghost clipbtn',ICON.play+'ดูคลิปสอนขั้นนี้');cb.type='button';cb.onclick=()=>playClip(adv?advClip(cs):CLIPS[cs],0);L.appendChild(cb);
   if(s.nota){
     const r=el('div','rules');
     [['R','หมุนด้านขวา'],['L','หมุนด้านซ้าย'],['U','หมุนด้านบน'],['D','หมุนด้านล่าง'],['F','หมุนด้านหน้า'],['B','หมุนด้านหลัง'],['R','ตัวอักษรเฉย ๆ คือหมุนตามเข็มนาฬิกา ↻ เมื่อมองตรงไปที่ด้านนั้น'],["R'",'มีขีด (อ่านว่า “ไพรม์”) คือหมุนทวนเข็มนาฬิกา ↺'],['R2','มีเลข 2 คือหมุน 2 ครั้ง']].forEach(([a,b],k)=>{if(k===6)r.appendChild(el('div','',''))&&r.appendChild(el('div','',''));r.append(el('b','',a),el('span','',b));});

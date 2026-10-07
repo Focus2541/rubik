@@ -212,6 +212,12 @@ body.bt-on .coach{display:block}
 .toggle span{font-size:15px}
 .toggle small{display:block;color:var(--muted);font-size:13px}
 .tlist li.dnf b{color:var(--warn)}
+body.clip-on .stage{height:330px}
+@media(min-width:980px){body.clip-on .stage{height:440px}}
+.capbar{position:absolute;left:10px;right:10px;bottom:8px;z-index:2;background:rgba(10,14,28,.72);color:#fff;border-radius:12px;padding:6px 11px;font:500 13.5px/1.45 Mitr,"IBM Plex Sans Thai",sans-serif;text-align:center;pointer-events:none;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.capbar[hidden]{display:none}
+@media(min-width:980px){.capbar{font-size:18px;bottom:18px;left:24px;right:24px}}
+.clipbtn{width:100%;margin-top:14px}
 /* bluetooth */
 .btpill{margin-left:auto;border:0;border-radius:999px;padding:7px 13px 7px 10px;display:inline-flex;align-items:center;gap:6px;background:var(--surface);box-shadow:var(--shadow);font:500 13px Mitr,sans-serif;color:var(--accent)}
 .btpill svg{width:18px;height:18px}
